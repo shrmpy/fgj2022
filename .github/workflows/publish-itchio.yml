@@ -1,0 +1,198 @@
+name: Publish on itch.io
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  PUB_USER: shrmpy
+  PUB_GAME: fgj2022
+
+jobs:
+
+  tests:
+    name: Run tests
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: '>=1.18.0'
+    - name: Install dependencies
+      shell: bash
+      run: sudo apt-get -y install libgl1-mesa-dev xorg-dev libasound2-dev
+    - name: Run tests
+      shell: bash
+      run: xvfb-run go test -v ./...
+
+  build-win:
+    name: Build PC binary
+    needs: tests
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: '>=1.18.0'
+    - name: Build PC exe
+      shell: bash
+      run: go build
+    - name: Upload PC exe
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ env.PUB_GAME }}-win
+        retention-days: 1
+        path: |
+          LICENSE
+          *.exe
+
+  build-mac:
+    name: Build OSX binary
+    needs: tests
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: '>=1.18.0'
+    - name: Build OSX bin
+      shell: bash
+      run: go build
+    - name: Tar it up
+      shell: bash
+      run: tar -zcvf ${{ env.PUB_GAME }}-mac.tar.gz LICENSE ${{ env.PUB_GAME }}
+    - name: Upload OSX bin
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ env.PUB_GAME }}-mac
+        path: ${{ env.PUB_GAME }}-mac.tar.gz
+        retention-days: 1
+
+  build-lin:
+    name: Build Linux binary
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: '>=1.18.0'
+    - name: Install dependencies
+      shell: bash
+      run: sudo apt-get -y install libgl1-mesa-dev xorg-dev libasound2-dev
+    - name: Build Linux bin
+      shell: bash
+      run: go build -v
+    - name: Tar it up
+      shell: bash
+      run: tar -zcvf ${{ env.PUB_GAME }}-lin.tar.gz LICENSE ${{ env.PUB_GAME }}
+    - name: Upload Linux bin
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ env.PUB_GAME }}-lin
+        path: ${{ env.PUB_GAME }}-lin.tar.gz
+        retention-days: 1
+
+  build-web:
+    needs: tests
+    runs-on: ubuntu-latest
+    name: Build Web assembly
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: '>=1.18.0'
+    - name: Build wasm
+      shell: bash
+      run: GOOS=js GOARCH=wasm go generate
+    - name: Upload wasm
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ env.PUB_GAME }}-web
+        retention-days: 1
+        path: |
+          dist/web/
+          LICENSE
+
+  pub-win:
+    needs: build-win
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    name: Pub PC build to itch.io
+    steps:
+    - uses: actions/download-artifact@v3
+      with:
+        name: ${{ env.PUB_GAME }}-win
+    - uses: manleydev/butler-publish-itchio-action@master
+      env:
+        BUTLER_CREDENTIALS: ${{ secrets.BUTLER_API_KEY }}
+        CHANNEL: windows
+        ITCH_GAME: ${{ env.PUB_GAME }}
+        ITCH_USER: ${{ env.PUB_USER }}
+        PACKAGE: build/windows
+        VERSION: ${{github.ref_name}}
+
+  pub-mac:
+    needs: build-mac
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    name: Pub OSX build to itch.io
+    steps:
+    - uses: actions/download-artifact@v3
+      with:
+        name: ${{ env.PUB_GAME }}-mac
+    - name: Extract tarball
+      shell: bash
+      run: tar -zxvf ${{ env.PUB_GAME }}-mac.tar.gz
+    - uses: manleydev/butler-publish-itchio-action@master
+      env:
+        BUTLER_CREDENTIALS: ${{ secrets.BUTLER_API_KEY }}
+        CHANNEL: mac
+        ITCH_GAME: ${{ env.PUB_GAME }}
+        ITCH_USER: ${{ env.PUB_USER }}
+        PACKAGE: build/mac
+        VERSION: ${{github.ref_name}}
+
+  pub-lin:
+    needs: build-lin
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    name: Pub Linux build to itch.io
+    steps:
+    - uses: actions/download-artifact@v3
+      with:
+        name: ${{ env.PUB_GAME }}-lin
+    - name: Extract tarball
+      shell: bash
+      run: tar -zxvf ${{ env.PUB_GAME }}-lin.tar.gz
+    - uses: manleydev/butler-publish-itchio-action@master
+      env:
+        BUTLER_CREDENTIALS: ${{ secrets.BUTLER_API_KEY }}
+        CHANNEL: linux
+        ITCH_GAME: ${{ env.PUB_GAME }}
+        ITCH_USER: ${{ env.PUB_USER }}
+        PACKAGE: build/linux
+        VERSION: ${{github.ref_name}}
+
+  pub-web:
+    needs: build-web
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    name: Pub itch.io web channel
+    steps:
+    - uses: actions/download-artifact@v3
+      with:
+        name: ${{ env.PUB_GAME }}-web
+    - uses: manleydev/butler-publish-itchio-action@master
+      env:
+        BUTLER_CREDENTIALS: ${{ secrets.BUTLER_API_KEY }}
+        CHANNEL: web
+        ITCH_GAME: ${{ env.PUB_GAME }}
+        ITCH_USER: ${{ env.PUB_USER }}
+        PACKAGE: dist/web
+        VERSION: ${{github.ref_name}}

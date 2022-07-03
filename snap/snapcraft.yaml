@@ -1,0 +1,66 @@
+name: fgj2022
+base: core20
+license: MIT
+website: https://shrmpy.itch.io/fgj2002/
+source-code: https://github.com/shrmpy/fgj2022/
+summary: myFirst Game Jam entry 
+description: |
+  This is in development. It is for the My First Game Jam (summer 2022 theme is heal)
+  I read that the Linux channel for itch.io downloads do not allow 32/64 bit
+  tags. This tells me ARM has fewer options. So snaps should be a convenient
+  way to reach some subset of that audience (me included).
+
+
+confinement: strict
+adopt-info: g-build
+architectures:
+  - build-on: amd64
+  - build-on: arm64
+  - build-on: armhf
+
+apps:
+  fgj2022:
+    command: bin/desktop-launch $SNAP/bin/fgj2022
+    plugs: [network,x11,unity7,opengl]
+
+parts:
+  g-build:
+    plugin: go
+    source: .
+    override-pull: |
+        snapcraftctl pull
+        version="$(git describe --tags --long)"
+        snapcraftctl set-version "$version"
+        snapcraftctl set-grade stable
+
+    build-packages: 
+    - git
+    - libc6-dev
+    - libglu1-mesa-dev
+    - libgl1-mesa-dev
+    - libxcursor-dev
+    - libxi-dev
+    - libxinerama-dev
+    - libxrandr-dev
+    - libxxf86vm-dev
+    - libasound2-dev
+    - pkg-config
+    stage-packages: 
+    - libgl1-mesa-glx
+    - libxcursor1
+    - libxi6
+    - libxinerama1
+    - libxrandr2
+    - libxxf86vm1
+    after: [desktop-glib-only]
+
+  desktop-glib-only:
+    source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
+    source-subdir: glib-only
+    source-depth: 1
+    plugin: make
+    build-packages:
+      - libglib2.0-dev
+    stage-packages:
+      - libglib2.0-bin
+
