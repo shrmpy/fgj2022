@@ -5,7 +5,7 @@ website: https://shrmpy.itch.io/fgj2002/
 source-code: https://github.com/shrmpy/fgj2022/
 summary: myFirst Game Jam entry 
 description: |
-  This is in development. It is for the My First Game Jam (summer 2022 theme is heal)
+  This is in development for the Summer 2022 Heal theme of My First Game Jam
   I read that the Linux channel for itch.io downloads do not allow 32/64 bit
   tags. This tells me ARM has fewer options. So snaps should be a convenient
   way to reach some subset of that audience (me included).
@@ -20,8 +20,9 @@ architectures:
 
 apps:
   fgj2022:
-    command: bin/desktop-launch $SNAP/bin/fgj2022
-    plugs: [network,x11,unity7,opengl]
+    command: $SNAP/bin/fgj2022
+    command-chain: bin/desktop-launch
+    plugs: [network,x11,unity7,opengl,alsa,audio-playback,pulseaudio]
 
 parts:
   g-build:
@@ -45,6 +46,7 @@ parts:
     - libxxf86vm-dev
     - libasound2-dev
     - pkg-config
+    - flite1-dev
     stage-packages: 
     - libgl1-mesa-glx
     - libxcursor1
@@ -52,6 +54,7 @@ parts:
     - libxinerama1
     - libxrandr2
     - libxxf86vm1
+    - libflite1
     after: [desktop-glib-only]
 
   desktop-glib-only:
@@ -63,4 +66,13 @@ parts:
       - libglib2.0-dev
     stage-packages:
       - libglib2.0-bin
+      - shared-mime-info
 
+
+layout:
+  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/alsa-lib:
+    symlink: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/alsa-lib
+  /usr/share/alsa:
+    symlink: $SNAP/usr/share/alsa
+  /usr/share/libdrm/amdgpu.ids:
+    symlink: $SNAP/usr/share/libdrm/amdgpu.ids
