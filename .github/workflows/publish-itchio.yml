@@ -61,14 +61,18 @@ jobs:
     - name: Build OSX bin
       shell: bash
       run: go build
-    - name: Tar it up
-      shell: bash
-      run: tar -zcvf ${{ env.PUB_GAME }}-mac.tar.gz LICENSE ${{ env.PUB_GAME }}
+    - name: Tarball of build subdir
+      run: |
+        mkdir -p build/mac
+        mv ${{ env.PUB_GAME }} build/mac/
+        mv LICENSE build/mac/
+        tar -zcvf ${{ env.PUB_GAME }}-mac.tgz build
+
     - name: Upload OSX bin
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.PUB_GAME }}-mac
-        path: ${{ env.PUB_GAME }}-mac.tar.gz
+        path: ${{ env.PUB_GAME }}-mac.tgz
         retention-days: 1
 
   build-lin:
@@ -87,14 +91,18 @@ jobs:
     - name: Build Linux bin
       shell: bash
       run: go build -v
-    - name: Tar it up
-      shell: bash
-      run: tar -zcvf ${{ env.PUB_GAME }}-lin.tar.gz LICENSE ${{ env.PUB_GAME }}
+    - name: Tarball of build subdir
+      run: |
+        mkdir -p build/linux
+        mv ${{ env.PUB_GAME }} build/linux/
+        mv LICENSE build/linux/
+        tar -zcvf ${{ env.PUB_GAME }}-lin.tgz build
+
     - name: Upload Linux bin
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.PUB_GAME }}-lin
-        path: ${{ env.PUB_GAME }}-lin.tar.gz
+        path: ${{ env.PUB_GAME }}.tgz
         retention-days: 1
 
   build-web:
@@ -116,7 +124,7 @@ jobs:
         name: ${{ env.PUB_GAME }}-web
         retention-days: 1
         path: |
-          dist/web/
+          dist/web
           LICENSE
 
   pub-win:
@@ -134,7 +142,7 @@ jobs:
         CHANNEL: windows
         ITCH_GAME: ${{ env.PUB_GAME }}
         ITCH_USER: ${{ env.PUB_USER }}
-        PACKAGE: build/windows
+        PACKAGE: *.exe
         VERSION: ${{github.ref_name}}
 
   pub-mac:
@@ -148,7 +156,7 @@ jobs:
         name: ${{ env.PUB_GAME }}-mac
     - name: Extract tarball
       shell: bash
-      run: tar -zxvf ${{ env.PUB_GAME }}-mac.tar.gz
+      run: tar -zxvf ${{ env.PUB_GAME }}-mac.tgz
     - uses: manleydev/butler-publish-itchio-action@master
       env:
         BUTLER_CREDENTIALS: ${{ secrets.BUTLER_API_KEY }}
@@ -169,7 +177,7 @@ jobs:
         name: ${{ env.PUB_GAME }}-lin
     - name: Extract tarball
       shell: bash
-      run: tar -zxvf ${{ env.PUB_GAME }}-lin.tar.gz
+      run: tar -zxvf ${{ env.PUB_GAME }}-lin.tgz
     - uses: manleydev/butler-publish-itchio-action@master
       env:
         BUTLER_CREDENTIALS: ${{ secrets.BUTLER_API_KEY }}
@@ -194,5 +202,5 @@ jobs:
         CHANNEL: web
         ITCH_GAME: ${{ env.PUB_GAME }}
         ITCH_USER: ${{ env.PUB_USER }}
-        PACKAGE: dist/web
+        PACKAGE: dist/web/*
         VERSION: ${{github.ref_name}}

@@ -8,6 +8,7 @@ import (
 	"log"
 )
 import (
+	////"github.com/gen2brain/flite-go"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/tinne26/etxt"
@@ -17,7 +18,6 @@ import (
 //go:generate env GOOS=js GOARCH=wasm go build -ldflags "-w -s" -o dist/web/fgj2022.wasm ./
 //go:embed DejaVuSansMono.ttf
 var dejavuSansMonoTTF []byte
-
 
 func init() {
 	log.SetFlags(log.Lshortfile | log.Ltime)
@@ -47,9 +47,10 @@ func main() {
 		Height:  ht,
 		txtre:   renderer,
 		history: make([]string, 0, 25),
-	}
-
-
+	}/*
+	if game.voice, err = flite.VoiceSelect("kal"); err != nil {
+		log.Fatalf("FAIL flite, %s", err.Error())
+	}*/
 
 	if err = ebiten.RunGame(game); err != nil {
 		log.Fatalf("FAIL main, %s", err.Error())
@@ -69,11 +70,11 @@ func (g *Game) Update() error {
 		ebiten.SetFullscreen(!fs)
 	}
 
-
-	// TODO 
-
-
-
+	// TODO wasi for web target
+	/*
+	if ebiten.IsKeyPressed(ebiten.KeySpace) {
+		flite.TextToSpeech("Hello World", g.voice, "play")
+	}*/
 
 	return nil
 }
@@ -81,7 +82,6 @@ func (g *Game) Update() error {
 // Draw renders one frame
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.printHistory(screen)
-
 
 }
 
@@ -101,17 +101,15 @@ func (g *Game) printHistory(screen *ebiten.Image) {
 	g.txtre.Draw(fmt.Sprintf("TPS: %0.2f", ebiten.CurrentTPS()), g.Width-1, g.Height)
 }
 
-
 // Game represents the main game state
 type Game struct {
-	Width   int
-	Height  int
+	Width  int
+	Height int
 
 	txtre   *etxt.Renderer
 	history []string
-
+	////voice   *flite.Voice
 }
-
 
 // Layout is static for now, can be dynamic
 func (g *Game) Layout(outsideWidth int, outsideHeight int) (int, int) {
@@ -125,5 +123,3 @@ func (g *Game) AddHistory(tmp string, values ...any) {
 		g.history = append(g.history, msg)
 	}
 }
-
-

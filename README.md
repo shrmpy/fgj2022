@@ -45,13 +45,16 @@ cd fgj2022
 # make snap 
 snapcraft
 # local install
-sudo snap install fgj2022_0.0.1_arm64.snap --dangerous
+sudo snap install fgj2022_0.0.2_arm64.snap --dangerous
 # start program
 fgj2022
 ```
 
 
 ## Credits
+
+Flite bindings
+ by [Milan Nikolic](https://github.com/gen2brain/flite-go) ([LICENSE](https://github.com/gen2brain/flite-go/blob/master/LICENSE))
 
 Github workflow
  by [Siôn le Roux](https://github.com/sinisterstuf/ebiten-game-template) ([LICENSE](https://github.com/sinisterstuf/ebiten-game-template/blob/main/LICENSE))
