@@ -8,7 +8,7 @@ import (
 	"log"
 )
 import (
-	"github.com/gen2brain/flite-go"
+	////"github.com/gen2brain/flite-go"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/tinne26/etxt"
@@ -47,10 +47,10 @@ func main() {
 		Height:  ht,
 		txtre:   renderer,
 		history: make([]string, 0, 25),
-	}
+	}/*
 	if game.voice, err = flite.VoiceSelect("kal"); err != nil {
 		log.Fatalf("FAIL flite, %s", err.Error())
-	}
+	}*/
 
 	if err = ebiten.RunGame(game); err != nil {
 		log.Fatalf("FAIL main, %s", err.Error())
@@ -70,10 +70,11 @@ func (g *Game) Update() error {
 		ebiten.SetFullscreen(!fs)
 	}
 
-	// TODO
+	// TODO wasi for web target
+	/*
 	if ebiten.IsKeyPressed(ebiten.KeySpace) {
 		flite.TextToSpeech("Hello World", g.voice, "play")
-	}
+	}*/
 
 	return nil
 }
@@ -107,7 +108,7 @@ type Game struct {
 
 	txtre   *etxt.Renderer
 	history []string
-	voice   *flite.Voice
+	////voice   *flite.Voice
 }
 
 // Layout is static for now, can be dynamic
