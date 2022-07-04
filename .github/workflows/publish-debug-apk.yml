@@ -26,6 +26,9 @@ jobs:
 
       - name: Setup Android SDK step 
         uses: android-actions/setup-android@v2
+      - name: Add flite step 
+        run: |
+          apt install -y flite1-dev
 
       - name: Add gomobile step 
         run: |
