@@ -69,4 +69,3 @@ jobs:
         ITCH_USER: ${{ env.PUB_USER }}
         PACKAGE: build/android
         VERSION: ${{github.ref_name}}
-

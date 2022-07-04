@@ -8,10 +8,10 @@ import (
 	"log"
 )
 import (
-	////"github.com/gen2brain/flite-go"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/tinne26/etxt"
+	"github.com/shrmpy/fgj2022/acorn"
 )
 
 //go:generate cp $GOROOT/misc/wasm/wasm_exec.js dist/web/wasm_exec.js
@@ -47,10 +47,8 @@ func main() {
 		Height:  ht,
 		txtre:   renderer,
 		history: make([]string, 0, 25),
-	}/*
-	if game.voice, err = flite.VoiceSelect("kal"); err != nil {
-		log.Fatalf("FAIL flite, %s", err.Error())
-	}*/
+	}
+	game.ac = acorn.NewAcorn(game.AddHistory)
 
 	if err = ebiten.RunGame(game); err != nil {
 		log.Fatalf("FAIL main, %s", err.Error())
@@ -70,11 +68,11 @@ func (g *Game) Update() error {
 		ebiten.SetFullscreen(!fs)
 	}
 
-	// TODO wasi for web target
-	/*
+	// TODO 
 	if ebiten.IsKeyPressed(ebiten.KeySpace) {
-		flite.TextToSpeech("Hello World", g.voice, "play")
-	}*/
+		//flite.TextToSpeech("Hello World", g.voice, "play")
+		g.ac.Update()
+	}
 
 	return nil
 }
@@ -108,7 +106,7 @@ type Game struct {
 
 	txtre   *etxt.Renderer
 	history []string
-	////voice   *flite.Voice
+	ac   *acorn.Acorn
 }
 
 // Layout is static for now, can be dynamic

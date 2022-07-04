@@ -21,59 +21,10 @@ jobs:
         go-version: '>=1.18.0'
     - name: Install dependencies
       shell: bash
-      run: sudo apt-get -y install libgl1-mesa-dev xorg-dev libasound2-dev
+      run: sudo apt-get -y install libgl1-mesa-dev xorg-dev libasound2-dev flite1-dev
     - name: Run tests
       shell: bash
       run: xvfb-run go test -v ./...
-
-  build-win:
-    name: Build PC binary
-    needs: tests
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up Go
-      uses: actions/setup-go@v3
-      with:
-        go-version: '>=1.18.0'
-    - name: Build PC exe
-      shell: bash
-      run: go build
-    - name: Upload PC exe
-      uses: actions/upload-artifact@v3
-      with:
-        name: ${{ env.PUB_GAME }}-win
-        retention-days: 1
-        path: |
-          LICENSE
-          *.exe
-
-  build-mac:
-    name: Build OSX binary
-    needs: tests
-    runs-on: macos-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up Go
-      uses: actions/setup-go@v3
-      with:
-        go-version: '>=1.18.0'
-    - name: Build OSX bin
-      shell: bash
-      run: go build
-    - name: Tarball of build subdir
-      run: |
-        mkdir -p build/mac
-        mv ${{ env.PUB_GAME }} build/mac/
-        mv LICENSE build/mac/
-        tar -zcvf ${{ env.PUB_GAME }}-mac.tgz build
-
-    - name: Upload OSX bin
-      uses: actions/upload-artifact@v3
-      with:
-        name: ${{ env.PUB_GAME }}-mac
-        path: ${{ env.PUB_GAME }}-mac.tgz
-        retention-days: 1
 
   build-lin:
     name: Build Linux binary
@@ -87,7 +38,7 @@ jobs:
         go-version: '>=1.18.0'
     - name: Install dependencies
       shell: bash
-      run: sudo apt-get -y install libgl1-mesa-dev xorg-dev libasound2-dev
+      run: sudo apt-get -y install libgl1-mesa-dev xorg-dev libasound2-dev flite1-dev
     - name: Build Linux bin
       shell: bash
       run: go build -v
@@ -126,45 +77,6 @@ jobs:
         path: |
           dist/web
           LICENSE
-
-  pub-win:
-    needs: build-win
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    name: Pub PC build to itch.io
-    steps:
-    - uses: actions/download-artifact@v3
-      with:
-        name: ${{ env.PUB_GAME }}-win
-    - uses: manleydev/butler-publish-itchio-action@master
-      env:
-        BUTLER_CREDENTIALS: ${{ secrets.BUTLER_API_KEY }}
-        CHANNEL: windows
-        ITCH_GAME: ${{ env.PUB_GAME }}
-        ITCH_USER: ${{ env.PUB_USER }}
-        PACKAGE: *.exe
-        VERSION: ${{github.ref_name}}
-
-  pub-mac:
-    needs: build-mac
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    name: Pub OSX build to itch.io
-    steps:
-    - uses: actions/download-artifact@v3
-      with:
-        name: ${{ env.PUB_GAME }}-mac
-    - name: Extract tarball
-      shell: bash
-      run: tar -zxvf ${{ env.PUB_GAME }}-mac.tgz
-    - uses: manleydev/butler-publish-itchio-action@master
-      env:
-        BUTLER_CREDENTIALS: ${{ secrets.BUTLER_API_KEY }}
-        CHANNEL: mac
-        ITCH_GAME: ${{ env.PUB_GAME }}
-        ITCH_USER: ${{ env.PUB_USER }}
-        PACKAGE: build/mac
-        VERSION: ${{github.ref_name}}
 
   pub-lin:
     needs: build-lin
