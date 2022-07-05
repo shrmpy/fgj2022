@@ -29,16 +29,21 @@ jobs:
         cd flite
         ./configure --host=wasm32-wasi CC=/opt/wasi-sdk/bin/clang AR=/opt/wasi-sdk/bin/llvm-ar RANLIB=/opt/wasi-sdk/bin/llvm-ranlib
         make
-        ls ./bin
         ls ./main
-        ls 
+
     - name: WASI artifacts
       uses: actions/upload-artifact@v3
       with:
         name: wasi-flite
         retention-days: 1
         path: |
-          bin/*
+          main/flite
+          main/flite_cmu_time_awb
+          main/flite_cmu_us_awb
+          main/flite_cmu_us_kal
+          main/flite_cmu_us_kal16
+          main/flite_cmu_us_rms
+          main/flite_cmu_us_slt
 
   archive_job:
     needs: wasi_job
