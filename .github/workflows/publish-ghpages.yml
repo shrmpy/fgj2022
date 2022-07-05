@@ -36,13 +36,7 @@ jobs:
         name: wasi-flite
         retention-days: 1
         path: |
-          flite
-          flite_cmu_time_awb
-          flite_cmu_us_awb
-          flite_cmu_us_kal
-          flite_cmu_us_kal16
-          flite_cmu_us_rms
-          flite_cmu_us_slt
+          flite/bin
 
   archive_job:
     needs: wasi_job
