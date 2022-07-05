@@ -29,6 +29,9 @@ jobs:
         cd flite
         ./configure --host=wasm32-wasi CC=/opt/wasi-sdk/bin/clang AR=/opt/wasi-sdk/bin/llvm-ar RANLIB=/opt/wasi-sdk/bin/llvm-ranlib
         make
+        ls ./bin
+        ls ./main
+        ls 
     - name: WASI artifacts
       uses: actions/upload-artifact@v3
       with:
