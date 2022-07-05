@@ -18,16 +18,17 @@ jobs:
         go-version: '>=1.18.0'
     - name: Dependencies step
       run: |
-        sudo apt install -y clang lld cmake autoconf gcc make g++
+        sudo apt install -y clang lld cmake 
     - name: WASI flite step
       env:
         WSDK: "${GITHUB_WORKSPACE}/wasi-sdk-16.0"
       run: |
         wget -q https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-16/wasi-sdk_16.0_amd64.deb
+        sudo dpkg -I wasi-sdk_16.0_amd64.deb
         sudo dpkg -i wasi-sdk_16.0_amd64.deb
         git clone --depth=1 https://github.com/festvox/flite.git
         cd flite
-        ./configure --host=wasm32-wasi CC=wasm32-wasi-clang AR=wasm32-wasi-llvm-ar RANLIB=wasm32-wasi-llvm-ranlib
+        ./configure --host=wasm32-wasi CC=/opt/wasi-sdk/bin/clang AR=/opt/wasi-sdk/bin/llvm-ar RANLIB=/opt/wasi-sdk/bin/llvm-ranlib
 
   archive_job:
     needs: wasi_job
