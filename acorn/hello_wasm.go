@@ -18,5 +18,7 @@ func (p *Parcel) Update() error {
 
 	return nil
 }
-
+func (p *Parcel) Experiment() error {
+	return nil
+}
 
