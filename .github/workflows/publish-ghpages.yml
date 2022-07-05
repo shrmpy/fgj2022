@@ -19,13 +19,12 @@ jobs:
     - name: WASI flite step
       env:
         WSDK: "${GITHUB_WORKSPACE}/wasi-sdk-16.0"
-        CC: "${WSDK}/bin/clang --sysroot=${WSDK}/share/wasi-sysroot"
       run: |
-        wget -q https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-16/wasi-sdk-16.0-linux.tar.gz
-        tar xvf wasi-sdk-16.0-linux.tar.gz
+        wget -q https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-16/wasi-sdk_16.0_amd64.deb
+        sudo dpkg -i wasi-sdk_16.0_amd64.deb
         git clone --depth=1 https://github.com/festvox/flite.git
         cd flite
-        ./configure --host=wasm32-wasi CC=${WSDK}/bin/clang AR=${WSDK}/bin/llvm-ar RANLIB=${WSDK}/bin/llvm-ranlib
+        ./configure --host=wasm32-wasi CC=wasm32-wasi-clang AR=wasm32-wasi-llvm-ar RANLIB=wasm32-wasi-llvm-ranlib
 
   archive_job:
     needs: wasi_job
