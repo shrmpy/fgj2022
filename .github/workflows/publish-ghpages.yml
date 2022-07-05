@@ -21,9 +21,9 @@ jobs:
         go-version: '>=1.18.0'
     - name: WASI flite step
       run: |
-        wget https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-${WASI_VERSION}/wasi-sdk-${WASI_VERSION_FULL}-linux.tar.gz
         tar xvf wasi-sdk-${WASI_VERSION_FULL}-linux.tar.gz
-
+        wget https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-16/wasi-sdk-16.0-linux.tar.gz
+        tar xvf wasi-sdk-16.0-linux.tar.gz
 
   archive_job:
     needs: wasi_job
