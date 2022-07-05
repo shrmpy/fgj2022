@@ -6,14 +6,14 @@ import (
 	//"log"
 )
 
-type Acorn struct {
+type Parcel struct {
 	info func(string, ...any)
 }
-func NewAcorn(fn func(string, ...any)) *Acorn {
-	ac := Acorn{ info: fn }
+func NewParcel(fn func(string, ...any)) *Acorn {
+	ac := Parcel{ info: fn }
 	return &ac
 }
-func (a *Acorn) Update() error {
+func (p *Parcel) Update() error {
 
 
 	return nil
