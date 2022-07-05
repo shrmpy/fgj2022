@@ -18,7 +18,7 @@ jobs:
         go-version: '>=1.18.0'
     - name: Dependencies step
       run: |
-        sudo apt install -y clang lld cmake
+        sudo apt install -y clang lld cmake autoconf gcc
     - name: WASI flite step
       env:
         WSDK: "${GITHUB_WORKSPACE}/wasi-sdk-16.0"
