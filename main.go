@@ -48,7 +48,7 @@ func main() {
 		txtre:   renderer,
 		history: make([]string, 0, 25),
 	}
-	game.ac = acorn.NewAcorn(game.AddHistory)
+	game.p = acorn.NewParcel(game.AddHistory)
 
 	if err = ebiten.RunGame(game); err != nil {
 		log.Fatalf("FAIL main, %s", err.Error())
@@ -70,8 +70,7 @@ func (g *Game) Update() error {
 
 	// TODO 
 	if ebiten.IsKeyPressed(ebiten.KeySpace) {
-		//flite.TextToSpeech("Hello World", g.voice, "play")
-		g.ac.Update()
+		g.p.Experiment()
 	}
 
 	return nil
@@ -106,7 +105,7 @@ type Game struct {
 
 	txtre   *etxt.Renderer
 	history []string
-	ac   *acorn.Acorn
+	p   *acorn.Parcel
 }
 
 // Layout is static for now, can be dynamic

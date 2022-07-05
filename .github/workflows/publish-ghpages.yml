@@ -8,9 +8,40 @@ permissions:
   contents: write
 
 jobs:
-  archive_job:
-    name: Archive 
+  wasi_job:
     runs-on: ubuntu-latest
+    name: WASI attempt 
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-go@v3
+      with:
+        go-version: '>=1.18.0'
+    - name: Dependencies step
+      run: |
+        sudo apt install -y  libasound2-dev
+    - name: WASI flite step
+      env:
+        WASI_SDK_PATH: "${GITHUB_WORKSPACE}/wasi-sdk-16.0"
+      run: |
+        wget -q https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-16/wasi-sdk_16.0_amd64.deb
+        sudo dpkg -i wasi-sdk_16.0_amd64.deb
+        git clone --depth=1 https://github.com/festvox/flite.git
+        cd flite
+        ./configure --host=wasm32-wasi CC=/opt/wasi-sdk/bin/clang AR=/opt/wasi-sdk/bin/llvm-ar RANLIB=/opt/wasi-sdk/bin/llvm-ranlib
+        make
+
+    - name: WASI artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: wasi-flite
+        retention-days: 1
+        path: |
+          flite/bin
+
+  archive_job:
+    needs: wasi_job
+    runs-on: ubuntu-latest
+    name: Archive 
     steps:
     - uses: actions/checkout@v3
     - name: Set up Go

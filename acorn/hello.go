@@ -11,25 +11,26 @@ import (
 	"github.com/gen2brain/flite-go"
 )
 
-type Acorn struct {
+type Parcel struct {
 	voice   *flite.Voice
-	info func(string, ...any)
+	hist func(string, ...any)
 }
-func NewAcorn(fn func(string, ...any)) *Acorn {
+func NewParcel(fn func(string, ...any)) *Parcel {
 	var err error
-	ac := Acorn{ info: fn }
-	if ac.voice, err = flite.VoiceSelect("kal"); err != nil {
-		ac.info("FAIL flite, %s", err.Error())
+	p := Parcel{ hist: fn }
+	if p.voice, err = flite.VoiceSelect("kal"); err != nil {
+		p.hist("FAIL flite, %s", err.Error())
 	}
-	return &ac
+	return &p
 }
-func (a *Acorn) Update() error {
+func (p *Parcel) Update() error {
 
-	/*
-	if ebiten.IsKeyPressed(ebiten.KeySpace) {
-		flite.TextToSpeech("Hello World", g.voice, "play")
-	}*/
-
+	return nil
+}
+func (p *Parcel) Experiment() error {
+// TODO first babystep is to output WAV file (so we can listen via indep player)
+	// flite experiment
+	flite.TextToSpeech("Hello World", p.voice, "output.wav")
 	return nil
 }
 

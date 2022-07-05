@@ -4,7 +4,7 @@ FROM golang:1.18
 RUN apt update && apt install -y --no-install-recommends \
     libc6-dev libglu1-mesa-dev libgl1-mesa-dev libxcursor-dev \
     libxi-dev libxinerama-dev libxrandr-dev libxxf86vm-dev libasound2-dev pkg-config \
-    flite-dev
+    flite-dev mesa-common-dev libgles2-mesa-dev
 
 WORKDIR /app
 COPY . .
