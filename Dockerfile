@@ -3,12 +3,11 @@ FROM golang:1.18
 
 RUN apt update && apt install -y --no-install-recommends \
     libc6-dev libglu1-mesa-dev libgl1-mesa-dev libxcursor-dev \
-    libxi-dev libxinerama-dev libxrandr-dev libxxf86vm-dev libasound2-dev pkg-config \
-    flite-dev mesa-common-dev libgles2-mesa-dev
+    libxi-dev libxinerama-dev libxrandr-dev libxxf86vm-dev libasound2-dev pkg-config 
 
 WORKDIR /app
 COPY . .
 ##RUN go get github.com/hajimehoshi/ebiten/v2
 ##RUN go get github.com/tinne26/etxt
-RUN go get -v github.com/gen2brain/flite-go
+
 
