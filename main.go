@@ -49,6 +49,9 @@ func main() {
 		history: make([]string, 0, 25),
 	}
 	game.p = acorn.NewParcel(game.AddHistory)
+	if game.play, err = NewPlay(); err != nil {
+		log.Fatalf("FAIL wav, %s", err.Error())
+	}
 
 	if err = ebiten.RunGame(game); err != nil {
 		log.Fatalf("FAIL main, %s", err.Error())
@@ -72,6 +75,7 @@ func (g *Game) Update() error {
 	if ebiten.IsKeyPressed(ebiten.KeySpace) {
 		g.p.Experiment()
 	}
+	g.play.Update()
 
 	return nil
 }
@@ -79,6 +83,7 @@ func (g *Game) Update() error {
 // Draw renders one frame
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.printHistory(screen)
+	g.play.Draw(screen)
 
 }
 
@@ -106,6 +111,7 @@ type Game struct {
 	txtre   *etxt.Renderer
 	history []string
 	p   *acorn.Parcel
+	play *testPlay
 }
 
 // Layout is static for now, can be dynamic

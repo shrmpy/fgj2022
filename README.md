@@ -45,13 +45,16 @@ cd fgj2022
 # make snap 
 snapcraft
 # local install
-sudo snap install fgj2022_0.0.2_arm64.snap --dangerous
+sudo snap install fgj2022_0.0.3_arm64.snap --dangerous
 # start program
 fgj2022
 ```
 
 
 ## Credits
+
+WASI flite 
+ by [Jakub Konka](http://www.jakubkonka.com/2019/04/20/wasi-flite.html)
 
 Flite bindings
  by [Milan Nikolic](https://github.com/gen2brain/flite-go) ([LICENSE](https://github.com/gen2brain/flite-go/blob/master/LICENSE))
