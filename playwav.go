@@ -86,7 +86,7 @@ func NewPlay(g *Game, wd, ht int, re *etxt.Renderer) (*testPlay, error) {
 }
 
 func newArrow(wd, ht int, re *etxt.Renderer, fg color.RGBA) *clickable {
-        var label = "▶"
+        var label = "▶PLAY"
         var sz = re.SelectionRect(label)
         return newClickable(0, ht, etxt.Bottom, etxt.Left, label, sz, fg)
 }
@@ -122,9 +122,9 @@ func (w *testPlay) Draw(re *etxt.Renderer) {
 
 	if w.audioPlayer.IsPlaying() {
 		log.Printf("INFO playing")
-		w.arrow.Text ="■"
+		w.arrow.Text ="■STOP"
 	} else {
-		w.arrow.Text ="▶"
+		w.arrow.Text ="▶PLAY"
 	}
 	//ebitenutil.DebugPrint(screen, "Press P to play the wav")
 	w.arrow.Draw(re)
