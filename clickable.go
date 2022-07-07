@@ -3,6 +3,7 @@
 package main
 
 import (
+	"image"
 	"image/color"
 )
 import (
@@ -70,6 +71,24 @@ func (c *clickable) Update() {
 	} else {
 		c.mouseDown = false
 	}
+}
+func (c *clickable) HitBox() image.Rectangle {
+	var minx, miny, maxx, maxy int
+	if c.ha == etxt.Left {
+		minx = c.x
+		maxx = c.x + c.rectSize.WidthCeil()
+	}else{
+		maxx = c.x
+		minx = c.x - c.rectSize.WidthCeil()
+	}
+	if c.va == etxt.Top {
+		miny = c.y
+		maxy = c.y + c.rectSize.HeightCeil()
+	}else{
+		maxy = c.y
+		miny = c.y - c.rectSize.HeightCeil()
+	}
+	return image.Rect(minx,miny,maxx,maxy)
 }
 func (c *clickable) Draw(re *etxt.Renderer) {
 	re.SetAlign(c.va,c.ha)

@@ -34,9 +34,10 @@ func main() {
 		history: make([]string, 0, 25),
 	}
 	game.p = acorn.NewParcel(game.AddHistory)
-	if game.play, err = NewPlay(wd,ht,game.txtre); err != nil {
+	if game.play, err = NewPlay(game, wd,ht,game.txtre); err != nil {
 		log.Fatalf("FAIL wav, %s", err.Error())
 	}
+	defer game.play.Close()
 
 	ebiten.SetWindowSize(wd, ht)
 	ebiten.SetWindowTitle("fgj2022")
@@ -47,6 +48,7 @@ func main() {
 
 // Update runs game logic steps
 func (g *Game) Update() error {
+	g.justPressedTouchIDs = inpututil.AppendJustPressedTouchIDs(g.justPressedTouchIDs[:0])
 	// Pressing Q any time quits immediately
 	if ebiten.IsKeyPressed(ebiten.KeyQ) {
 		return fmt.Errorf("INFO Quit key")
@@ -62,6 +64,7 @@ func (g *Game) Update() error {
 	if ebiten.IsKeyPressed(ebiten.KeySpace) {
 		g.p.Experiment()
 	}
+
 	g.play.Update()
 
 	return nil
@@ -116,6 +119,7 @@ type Game struct {
 	history []string
 	p   *acorn.Parcel
 	play *testPlay
+	justPressedTouchIDs []ebiten.TouchID
 }
 
 // Layout is static for now, can be dynamic

@@ -17,12 +17,14 @@ package main
 
 import (
 	"bytes"
+	"image"
 	"image/color"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
-	"github.com/hajimehoshi/ebiten/v2/audio/wav"
+	//"github.com/hajimehoshi/ebiten/v2/audio/wav"
+	"github.com/hajimehoshi/ebiten/v2/audio/vorbis"
 	raudio "github.com/hajimehoshi/ebiten/v2/examples/resources/audio"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 
@@ -30,17 +32,18 @@ import (
 )
 
 const (
-	sampleRate   = 48000
+	sampleRate   = 32000
 )
 
 type testPlay struct {
 	audioContext *audio.Context
 	audioPlayer  *audio.Player
 	arrow *clickable
+	game *Game
 }
 
-func NewPlay(wd, ht int, re *etxt.Renderer) (*testPlay, error) {
-	var w = &testPlay{}
+func NewPlay(g *Game, wd, ht int, re *etxt.Renderer) (*testPlay, error) {
+	var w = &testPlay{ game: g }
 
 	var err error
 	// Initialize audio context.
@@ -61,7 +64,8 @@ func NewPlay(wd, ht int, re *etxt.Renderer) (*testPlay, error) {
 	//     ...
 
 	// Decode wav-formatted data and retrieve decoded PCM stream.
-	d, err := wav.DecodeWithSampleRate(sampleRate,bytes.NewReader(raudio.Jab_wav))
+	//d, err := wav.DecodeWithSampleRate(sampleRate,bytes.NewReader(raudio.Jab_wav))
+	d, err := vorbis.DecodeWithSampleRate(sampleRate,bytes.NewReader(raudio.Ragtime_ogg))
 	if err != nil {
 		return nil, err
 	}
@@ -72,11 +76,10 @@ func NewPlay(wd, ht int, re *etxt.Renderer) (*testPlay, error) {
 		return nil, err
 	}
 
-	w.arrow = newArrow(wd,ht,re,color.RGBA{0xff,0xff,0x0,0xff})
-	w.arrow.HandleFunc(func(el mue) {
-		w.audioPlayer.Rewind()
-		w.audioPlayer.Play()
-	})
+	w.arrow = newArrow(wd,ht,re,color.RGBA{0xff,0x72,0x5c,0xff})
+	w.arrow.HandleFunc(func(el mue) { w.toggleAudio() })
+
+	w.audioPlayer.SetVolume(1)
 
 	return w, nil
 }
@@ -91,19 +94,62 @@ func (w *testPlay) Update() error {
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
 		// As audioPlayer has one stream and remembers the playing position,
 		// rewinding is needed before playing when reusing audioPlayer.
-		w.audioPlayer.Rewind()
-		w.audioPlayer.Play()
+		//w.audioPlayer.Rewind()
+		//w.audioPlayer.Play()
+		w.arrow.Action()
+		return nil
 	}
-	w.arrow.Update()
+	//w.arrow.Update()
+	// search touch events
+	if w.controlAudio() {
+		w.arrow.Action()
+	}
+
 	return nil
 }
 
 func (w *testPlay) Draw(re *etxt.Renderer) {
 	if w.audioPlayer.IsPlaying() {
 		log.Printf("INFO playing")
-	//} else {
-		//ebitenutil.DebugPrint(screen, "Press P to play the wav")
+		w.arrow.Text ="■"
+	} else {
+		w.arrow.Text ="▶"
 	}
+	//ebitenutil.DebugPrint(screen, "Press P to play the wav")
 	w.arrow.Draw(re)
+}
+// any touch event?
+func (w *testPlay) controlAudio() bool {
+/*
+	r := image.Rectangle{
+		Min: p.playButtonPosition,
+		Max: p.playButtonPosition.Add(image.Pt(playButtonImage.Size())),
+	}*/
+	var r = w.arrow.HitBox()
+	if image.Pt(ebiten.CursorPosition()).In(r) {
+		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+			return true
+		}
+	}
+	//todo alt instead of ref to game
+	for _, id := range w.game.justPressedTouchIDs {
+		if image.Pt(ebiten.TouchPosition(id)).In(r) {
+			return true
+		}
+	}
+	return false
+}
+// attached to the play-arrow
+func (w *testPlay) toggleAudio() {
+	if w.audioPlayer.IsPlaying() {
+		w.audioPlayer.Pause()
+		return
+	}
+	w.audioPlayer.Play()
+}
+func (w *testPlay) Close() {
+	if w.audioPlayer != nil {
+		w.audioPlayer.Close()
+	}
 }
 
