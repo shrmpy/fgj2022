@@ -25,34 +25,21 @@ func init() {
 func main() {
 	var (
 		err    error
-		name   string
 		wd, ht = 640, 480
-		ch     = make(chan string, 100)
-		fonts  = etxt.NewFontLibrary()
 	)
-	defer close(ch)
-	if name, err = fonts.ParseFontBytes(dejavuSansMonoTTF); err != nil {
-		log.Fatalf("FAIL Parse DejaVu Sans Mono, %s", err.Error())
-	}
-	log.Printf("INFO font, %s", name)
-	var renderer = etxt.NewStdRenderer()
-	renderer.SetCacheHandler(etxt.NewDefaultCache(2 * 1024 * 1024).NewHandler())
-	renderer.SetFont(fonts.GetFont("DejaVu Sans Mono"))
-	renderer.SetColor(color.White)
-	renderer.SetSizePx(12)
-	ebiten.SetWindowSize(wd, ht)
-	ebiten.SetWindowTitle("fgj2022")
 	var game = &Game{
 		Width:   wd,
 		Height:  ht,
-		txtre:   renderer,
+		txtre:   newRenderer(),
 		history: make([]string, 0, 25),
 	}
 	game.p = acorn.NewParcel(game.AddHistory)
-	if game.play, err = NewPlay(); err != nil {
+	if game.play, err = NewPlay(wd,ht,game.txtre); err != nil {
 		log.Fatalf("FAIL wav, %s", err.Error())
 	}
 
+	ebiten.SetWindowSize(wd, ht)
+	ebiten.SetWindowTitle("fgj2022")
 	if err = ebiten.RunGame(game); err != nil {
 		log.Fatalf("FAIL main, %s", err.Error())
 	}
@@ -83,10 +70,27 @@ func (g *Game) Update() error {
 // Draw renders one frame
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.printHistory(screen)
-	g.play.Draw(screen)
+	g.play.Draw(g.txtre)
 
 }
 
+func newRenderer() *etxt.Renderer {
+	var (
+		err error
+		name string
+		fonts  = etxt.NewFontLibrary()
+	)
+	if name, err = fonts.ParseFontBytes(dejavuSansMonoTTF); err != nil {
+		log.Fatalf("FAIL Parse DejaVu Sans Mono, %s", err.Error())
+	}
+	log.Printf("INFO font, %s", name)
+	var renderer = etxt.NewStdRenderer()
+	renderer.SetCacheHandler(etxt.NewDefaultCache(2 * 1024 * 1024).NewHandler())
+	renderer.SetFont(fonts.GetFont("DejaVu Sans Mono"))
+	renderer.SetColor(color.White)
+	renderer.SetSizePx(18)
+	return renderer
+}
 func (g *Game) printHistory(screen *ebiten.Image) {
 	// help us troubleshoot
 	g.txtre.SetTarget(screen)

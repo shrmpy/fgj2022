@@ -17,13 +17,16 @@ package main
 
 import (
 	"bytes"
+	"image/color"
+	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/hajimehoshi/ebiten/v2/audio/wav"
 	raudio "github.com/hajimehoshi/ebiten/v2/examples/resources/audio"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+
+	"github.com/tinne26/etxt"
 )
 
 const (
@@ -33,14 +36,15 @@ const (
 type testPlay struct {
 	audioContext *audio.Context
 	audioPlayer  *audio.Player
+	arrow *clickable
 }
 
-func NewPlay() (*testPlay, error) {
-	g := &testPlay{}
+func NewPlay(wd, ht int, re *etxt.Renderer) (*testPlay, error) {
+	var w = &testPlay{}
 
 	var err error
 	// Initialize audio context.
-	g.audioContext = audio.NewContext(sampleRate)
+	w.audioContext = audio.NewContext(sampleRate)
 
 	// In this example, embedded resource "Jab_wav" is used.
 	//
@@ -63,30 +67,43 @@ func NewPlay() (*testPlay, error) {
 	}
 
 	// Create an audio.Player that has one stream.
-	g.audioPlayer, err = g.audioContext.NewPlayer(d)
+	w.audioPlayer, err = w.audioContext.NewPlayer(d)
 	if err != nil {
 		return nil, err
 	}
 
-	return g, nil
+	w.arrow = newArrow(wd,ht,re,color.RGBA{0xff,0xff,0x0,0xff})
+	w.arrow.HandleFunc(func(el mue) {
+		w.audioPlayer.Rewind()
+		w.audioPlayer.Play()
+	})
+
+	return w, nil
 }
 
-func (g *testPlay) Update() error {
+func newArrow(wd, ht int, re *etxt.Renderer, fg color.RGBA) *clickable {
+        var label = "▶"
+        var sz = re.SelectionRect(label)
+        return newClickable(0, ht, etxt.Bottom, etxt.Left, label, sz, fg)
+}
+
+func (w *testPlay) Update() error {
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
 		// As audioPlayer has one stream and remembers the playing position,
 		// rewinding is needed before playing when reusing audioPlayer.
-		g.audioPlayer.Rewind()
-		g.audioPlayer.Play()
+		w.audioPlayer.Rewind()
+		w.audioPlayer.Play()
 	}
+	w.arrow.Update()
 	return nil
 }
 
-
-func (g *testPlay) Draw(screen *ebiten.Image) {
-	if g.audioPlayer.IsPlaying() {
-		ebitenutil.DebugPrint(screen, "Bump!")
-	} else {
-		ebitenutil.DebugPrint(screen, "Press P to play the wav")
+func (w *testPlay) Draw(re *etxt.Renderer) {
+	if w.audioPlayer.IsPlaying() {
+		log.Printf("INFO playing")
+	//} else {
+		//ebitenutil.DebugPrint(screen, "Press P to play the wav")
 	}
+	w.arrow.Draw(re)
 }
 
