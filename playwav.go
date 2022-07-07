@@ -80,6 +80,7 @@ func NewPlay(g *Game, wd, ht int, re *etxt.Renderer) (*testPlay, error) {
 	w.arrow.HandleFunc(func(el mue) { w.toggleAudio() })
 
 	w.audioPlayer.SetVolume(1)
+	w.audioPlayer.Play()
 
 	return w, nil
 }
@@ -109,6 +110,16 @@ func (w *testPlay) Update() error {
 }
 
 func (w *testPlay) Draw(re *etxt.Renderer) {
+/*
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(float64(w.playButtonPosition.X), float64(w.playButtonPosition.Y))
+	if w.audioPlayer.IsPlaying() {
+		screen.DrawImage(pauseButtonImage, op)
+	} else {
+		screen.DrawImage(playButtonImage, op)
+	}*/
+
+
 	if w.audioPlayer.IsPlaying() {
 		log.Printf("INFO playing")
 		w.arrow.Text ="■"

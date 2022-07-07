@@ -17,6 +17,13 @@ architectures:
   - build-on: amd64
   - build-on: arm64
   - build-on: armhf
+layout:
+  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/alsa-lib:
+    symlink: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/alsa-lib
+  /usr/share/alsa:
+    symlink: $SNAP/usr/share/alsa
+  /usr/share/libdrm/amdgpu.ids:
+    symlink: $SNAP/usr/share/libdrm/amdgpu.ids
 
 apps:
   fgj2022:
@@ -46,7 +53,7 @@ parts:
     - libxxf86vm-dev
     - libasound2-dev
     - pkg-config
-    - flite1-dev
+
     stage-packages: 
     - libgl1-mesa-glx
     - libxcursor1
@@ -54,7 +61,8 @@ parts:
     - libxinerama1
     - libxrandr2
     - libxxf86vm1
-    - libflite1
+    - libasound2
+
     after: [desktop-glib-only]
 
   desktop-glib-only:
@@ -69,10 +77,3 @@ parts:
       - shared-mime-info
 
 
-layout:
-  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/alsa-lib:
-    symlink: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/alsa-lib
-  /usr/share/alsa:
-    symlink: $SNAP/usr/share/alsa
-  /usr/share/libdrm/amdgpu.ids:
-    symlink: $SNAP/usr/share/libdrm/amdgpu.ids
