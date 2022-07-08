@@ -16,12 +16,8 @@ jobs:
     - uses: actions/setup-go@v3
       with:
         go-version: '>=1.18.0'
-    - name: Dependencies step
-      run: |
-        sudo apt install -y  libasound2-dev
+
     - name: WASI flite step
-      env:
-        WASI_SDK_PATH: "${GITHUB_WORKSPACE}/wasi-sdk-16.0"
       run: |
         wget -q https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-16/wasi-sdk_16.0_amd64.deb
         sudo dpkg -i wasi-sdk_16.0_amd64.deb
@@ -44,13 +40,20 @@ jobs:
     name: Archive 
     steps:
     - uses: actions/checkout@v3
+    - uses: actions/download-artifact@v3
+      with:
+        name: wasi-flite
+        path: tmp
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
         go-version: '>=1.18.0'
-    - name: WASM target
-      shell: bash
-      run: GOOS=js GOARCH=wasm go generate
+
+    - name: WASM target step
+      run: |
+        mv tmp/flite dist/flite.wasm
+        GOOS=js GOARCH=wasm go generate
+
     - name: Archive artifacts
       uses: actions/upload-artifact@v3
       with:

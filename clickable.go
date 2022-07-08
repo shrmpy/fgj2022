@@ -1,5 +1,4 @@
 
-
 package main
 
 import (
@@ -41,37 +40,24 @@ func newClickable(x, y int, va etxt.VertAlign, ha etxt.HorzAlign,
 }
 
 func (c *clickable) Update() {
+	// TODO fold in touch events too
 	var click = ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
 	if !click {
 		if c.mouseDown {
+			// was depressed, now "key-up"
 			c.Action()
 		}
 		c.mouseDown = false
 		return
 	}
-	var minx, miny, maxx, maxy int
-	if c.ha == etxt.Left {
-		minx = c.x
-		maxx = c.x + c.rectSize.WidthCeil()
-	}else{
-		maxx = c.x
-		minx = c.x - c.rectSize.WidthCeil()
-	}
-	if c.va == etxt.Top {
-		miny = c.y
-		maxy = c.y + c.rectSize.HeightCeil()
-	}else{
-		maxy = c.y
-		miny = c.y - c.rectSize.HeightCeil()
-	}
-	var x, y = ebiten.CursorPosition()
-	if minx <= x && x < maxx && miny <= y && y < maxy {
-		// calc cursor lands in box
+	var hb = c.HitBox()
+	if image.Pt(ebiten.CursorPosition()).In(hb) {
 		c.mouseDown = true
 	} else {
 		c.mouseDown = false
 	}
 }
+// bounds with respect to h/v alignment
 func (c *clickable) HitBox() image.Rectangle {
 	var minx, miny, maxx, maxy int
 	if c.ha == etxt.Left {

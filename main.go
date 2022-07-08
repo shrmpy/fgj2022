@@ -73,8 +73,7 @@ func (g *Game) Update() error {
 // Draw renders one frame
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.printHistory(screen)
-	g.play.Draw(g.txtre)
-
+	g.play.Draw(g.txtre, screen)
 }
 
 func newRenderer() *etxt.Renderer {

@@ -19,27 +19,30 @@ import (
 	"bytes"
 	"image"
 	"image/color"
+	_ "image/png"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
-	//"github.com/hajimehoshi/ebiten/v2/audio/wav"
-	"github.com/hajimehoshi/ebiten/v2/audio/vorbis"
-	raudio "github.com/hajimehoshi/ebiten/v2/examples/resources/audio"
+	"github.com/hajimehoshi/ebiten/v2/audio/wav"
+	//"github.com/hajimehoshi/ebiten/v2/audio/vorbis"
+	//raudio "github.com/hajimehoshi/ebiten/v2/examples/resources/audio"
+	riaudio "github.com/hajimehoshi/ebiten/v2/examples/resources/images/audio"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
-
 	"github.com/tinne26/etxt"
 )
 
 const (
 	sampleRate   = 32000
 )
+var alertButtonImage *ebiten.Image
 
 type testPlay struct {
 	audioContext *audio.Context
 	audioPlayer  *audio.Player
 	arrow *clickable
 	game *Game
+	alertButtonPosition image.Point
 }
 
 func NewPlay(g *Game, wd, ht int, re *etxt.Renderer) (*testPlay, error) {
@@ -64,8 +67,8 @@ func NewPlay(g *Game, wd, ht int, re *etxt.Renderer) (*testPlay, error) {
 	//     ...
 
 	// Decode wav-formatted data and retrieve decoded PCM stream.
-	//d, err := wav.DecodeWithSampleRate(sampleRate,bytes.NewReader(raudio.Jab_wav))
-	d, err := vorbis.DecodeWithSampleRate(sampleRate,bytes.NewReader(raudio.Ragtime_ogg))
+	d, err := wav.DecodeWithSampleRate(sampleRate,bytes.NewReader(flite_WAV))
+	//d, err := vorbis.DecodeWithSampleRate(sampleRate,bytes.NewReader(raudio.Ragtime_ogg))
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +83,18 @@ func NewPlay(g *Game, wd, ht int, re *etxt.Renderer) (*testPlay, error) {
 	w.arrow.HandleFunc(func(el mue) { w.toggleAudio() })
 
 	w.audioPlayer.SetVolume(1)
-	w.audioPlayer.Play()
+	////w.audioPlayer.Play()
+	const btnPadding = 16
+
+	img, _, err := image.Decode(bytes.NewReader(riaudio.Alert_png))
+	if err != nil {
+		return nil,err
+	}
+	alertButtonImage = ebiten.NewImageFromImage(img)
+	var sz, _ = alertButtonImage.Size()
+
+	w.alertButtonPosition.X = (ht -sz*2 + btnPadding*1) / 2 + sz + btnPadding
+	w.alertButtonPosition.Y = ht - 160
 
 	return w, nil
 }
@@ -92,33 +106,26 @@ func newArrow(wd, ht int, re *etxt.Renderer, fg color.RGBA) *clickable {
 }
 
 func (w *testPlay) Update() error {
+	/* //TODO press P key needs keyboard in mobile
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
-		// As audioPlayer has one stream and remembers the playing position,
-		// rewinding is needed before playing when reusing audioPlayer.
-		//w.audioPlayer.Rewind()
-		//w.audioPlayer.Play()
 		w.arrow.Action()
 		return nil
-	}
-	//w.arrow.Update()
+	}*/
+
 	// search touch events
 	if w.controlAudio() {
 		w.arrow.Action()
+	}
+	if w.fliteAudio() {
+		log.Printf("INFO flite enter")
+		fliteTest("Hello world.")
+		log.Printf("INFO flite exit")
 	}
 
 	return nil
 }
 
-func (w *testPlay) Draw(re *etxt.Renderer) {
-/*
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(float64(w.playButtonPosition.X), float64(w.playButtonPosition.Y))
-	if w.audioPlayer.IsPlaying() {
-		screen.DrawImage(pauseButtonImage, op)
-	} else {
-		screen.DrawImage(playButtonImage, op)
-	}*/
-
+func (w *testPlay) Draw(re *etxt.Renderer, screen *ebiten.Image) {
 
 	if w.audioPlayer.IsPlaying() {
 		log.Printf("INFO playing")
@@ -126,17 +133,35 @@ func (w *testPlay) Draw(re *etxt.Renderer) {
 	} else {
 		w.arrow.Text ="▶PLAY"
 	}
-	//ebitenutil.DebugPrint(screen, "Press P to play the wav")
+
 	w.arrow.Draw(re)
+
+        var op = &ebiten.DrawImageOptions{}
+        op.GeoM.Translate(float64(w.alertButtonPosition.X), float64(w.alertButtonPosition.Y))
+        screen.DrawImage(alertButtonImage, op)
 }
 // any touch event?
 func (w *testPlay) controlAudio() bool {
-/*
-	r := image.Rectangle{
-		Min: p.playButtonPosition,
-		Max: p.playButtonPosition.Add(image.Pt(playButtonImage.Size())),
-	}*/
 	var r = w.arrow.HitBox()
+	if image.Pt(ebiten.CursorPosition()).In(r) {
+		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+			return true
+		}
+	}
+	//todo alt instead of ref to game
+	for _, id := range w.game.justPressedTouchIDs {
+		if image.Pt(ebiten.TouchPosition(id)).In(r) {
+			return true
+		}
+	}
+	return false
+}
+func (w *testPlay) fliteAudio() bool {
+	var r = image.Rectangle{
+		Min: w.alertButtonPosition,
+		Max: w.alertButtonPosition.Add(image.Pt(alertButtonImage.Size())),
+	}
+
 	if image.Pt(ebiten.CursorPosition()).In(r) {
 		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 			return true

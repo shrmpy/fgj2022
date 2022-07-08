@@ -23,6 +23,8 @@ github.com/kr/pretty v0.2.1/go.mod h1:ipq/a2n7PKx3OHsz4KJII5eveXtPO4qwEXGdVfWzfn
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
 github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8/go.mod h1:HKlIX3XHQyzLZPlr7++PzdhaXEj94dEiJgZDTsxEqUI=
+github.com/tetratelabs/wazero v0.0.0-20220708024950-f0e05fb95bf2 h1:l5z4djkOib3zH2M/74Om6drL4KSrS2Qg8hjdEHoMyaY=
+github.com/tetratelabs/wazero v0.0.0-20220708024950-f0e05fb95bf2/go.mod h1:Y4X/zO4sC2dJjZG9GDYNRbJGogfqFYJY/BbyKlOxXGI=
 github.com/tinne26/etxt v0.0.3 h1:5iiov0wJYP4PMMuNHNYxPUNiVYBui+/MJ6uCXGOD+Nk=
 github.com/tinne26/etxt v0.0.3/go.mod h1:/MNMxBDEVwVDzQAwg9tXLsmMlGbyur+P3preNfzqF4E=
 github.com/yuin/goldmark v1.4.0/go.mod h1:mwnBkeHKe2W/ZEtQ+71ViKU8L12m81fl3OWwC1Zlc8k=
