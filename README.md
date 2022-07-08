@@ -53,6 +53,12 @@ fgj2022
 
 ## Credits
 
+Wazero embed
+ by [Fernando Talavera](https://github.com/efejjota/ebiten-wasm-graphics)
+
+Wazero
+ by [Tetrate.io](https://github.com/tetratelabs/wazero) ([LICENSE](https://github.com/tetratelabs/wazero/blob/main/LICENSE))
+
 WASI flite 
  by [Jakub Konka](http://www.jakubkonka.com/2019/04/20/wasi-flite.html)
 
