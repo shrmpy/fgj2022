@@ -17,6 +17,8 @@ import (
 )
 //go:embed dist/web
 var flite_fs embed.FS
+//go:embed dist/testout.wav
+var flite_WAV []byte
 //go:embed dist/flite.wasm
 var flite_wasm []byte
 

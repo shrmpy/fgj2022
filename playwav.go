@@ -24,8 +24,9 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
-	"github.com/hajimehoshi/ebiten/v2/audio/vorbis"
-	raudio "github.com/hajimehoshi/ebiten/v2/examples/resources/audio"
+	"github.com/hajimehoshi/ebiten/v2/audio/wav"
+	//"github.com/hajimehoshi/ebiten/v2/audio/vorbis"
+	//raudio "github.com/hajimehoshi/ebiten/v2/examples/resources/audio"
 	riaudio "github.com/hajimehoshi/ebiten/v2/examples/resources/images/audio"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/tinne26/etxt"
@@ -66,8 +67,8 @@ func NewPlay(g *Game, wd, ht int, re *etxt.Renderer) (*testPlay, error) {
 	//     ...
 
 	// Decode wav-formatted data and retrieve decoded PCM stream.
-	//d, err := wav.DecodeWithSampleRate(sampleRate,bytes.NewReader(raudio.Jab_wav))
-	d, err := vorbis.DecodeWithSampleRate(sampleRate,bytes.NewReader(raudio.Ragtime_ogg))
+	d, err := wav.DecodeWithSampleRate(sampleRate,bytes.NewReader(flite_WAV))
+	//d, err := vorbis.DecodeWithSampleRate(sampleRate,bytes.NewReader(raudio.Ragtime_ogg))
 	if err != nil {
 		return nil, err
 	}
