@@ -42,7 +42,6 @@
 #include <string.h>
 #include "flite.h"
 
-cst_voice *register_cmu_us_kal();
 
 int main(int argc, char **argv)
 {
@@ -51,8 +50,9 @@ int main(int argc, char **argv)
     cst_utterance *u;
 
     flite_init();
-    v = register_cmu_us_kal();
-    u = flite_synth_text("hello world of flite", v);
+    flite_set_voice_list(NULL);
+    v = flite_voice_select("kal");
+    u = flite_synth_text("whole new world of flite", v);
     w = utt_wave(u);
     cst_wave_save_riff(w, "output.wav");
     /* calls cst_wave_save_riff_fd(w,fd) which uses cst_fwrite

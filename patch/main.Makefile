@@ -140,8 +140,11 @@ $(BINDIR)/word_times$(EXEEXT): word_times_main.o $(flite_LIBS_deps)
 $(BINDIR)/compile_regexes$(EXEEXT): compile_regexes.o $(FLITELIBS)
 	$(CC) $(CFLAGS) -o $@ compile_regexes.o $(FLITELIBFLAGS) $(LDFLAGS)
 
-$(BINDIR)/copy_buffer$(EXEEXT): copy_buffer_main.o $(flite_LIBS_deps)
-	$(CC) $(CFLAGS) -o $@ copy_buffer_main.o $(flite_LIBS_flags) $(FLITELIBFLAGS) $(LDFLAGS) 
+$(BINDIR)/copy_buffer$(EXEEXT): copy_buffer_main.o flite_lang_list $(flite_LIBS_deps)
+	$(TOP)/tools/make_voice_list $(VOICES)
+	rm -f flite_voice_list.o
+	$(MAKE) flite_voice_list.o
+	$(CC) $(CFLAGS) -o $@ copy_buffer_main.o flite_voice_list.o flite_lang_list.o $(flite_LIBS_flags) $(LDFLAGS)
 
 
 each:
