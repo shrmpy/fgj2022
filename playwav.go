@@ -33,7 +33,7 @@ import (
 )
 
 const (
-	sampleRate   = 32000
+	sampleRate   = 16000
 )
 var alertButtonImage *ebiten.Image
 
@@ -83,7 +83,6 @@ func NewPlay(g *Game, wd, ht int, re *etxt.Renderer) (*testPlay, error) {
 	w.arrow.HandleFunc(func(el mue) { w.toggleAudio() })
 
 	w.audioPlayer.SetVolume(1)
-	////w.audioPlayer.Play()
 	const btnPadding = 16
 
 	img, _, err := image.Decode(bytes.NewReader(riaudio.Alert_png))
@@ -114,6 +113,11 @@ func (w *testPlay) Update() error {
 
 	// search touch events
 	if w.controlAudio() {
+		if file, err := tmpFS.Open("output.wav"); err == nil {
+			if si, ferr := file.Stat(); ferr == nil {
+				log.Printf("DEBUG %s, %d / %v", si.Name(), si.Size(), si.Sys())
+			}
+		}
 		w.arrow.Action()
 	}
 	if w.fliteAudio() {
@@ -181,6 +185,7 @@ func (w *testPlay) toggleAudio() {
 		w.audioPlayer.Pause()
 		return
 	}
+	w.audioPlayer.Rewind()
 	w.audioPlayer.Play()
 }
 func (w *testPlay) Close() {
