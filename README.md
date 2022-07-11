@@ -53,6 +53,9 @@ fgj2022
 
 ## Credits
 
+Wazero imports
+ by [Yeicor](https://github.com/Yeicor/sdfx-isosurface)
+
 Wazero embed
  by [Fernando Talavera](https://github.com/efejjota/ebiten-wasm-graphics)
 
