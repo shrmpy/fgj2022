@@ -113,17 +113,21 @@ func (w *testPlay) Update() error {
 
 	// search touch events
 	if w.controlAudio() {
+		/*
 		if file, err := tmpFS.Open("output.wav"); err == nil {
 			if si, ferr := file.Stat(); ferr == nil {
 				log.Printf("DEBUG %s, %d / %v", si.Name(), si.Size(), si.Sys())
 			}
-		}
+		}*/
 		w.arrow.Action()
 	}
 	if w.fliteAudio() {
 		log.Printf("INFO flite enter")
-		fliteTest("Hello world.")
+		data := fliteTest("Flite hello world placeholder.")
 		log.Printf("INFO flite exit")
+	        if _, err := wav.DecodeWithSampleRate(sampleRate,data); err != nil {
+			log.Printf("DEBUG buffer, %s", err.Error())
+		}
 	}
 
 	return nil

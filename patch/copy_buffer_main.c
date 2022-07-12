@@ -50,7 +50,7 @@ int main(int argc, char **argv)
 
     flite_init();
     flite_set_voice_list(NULL);
-    v = flite_voice_select("kal");
+    v = flite_voice_select("awb");
     u = flite_synth_text("whole new world of flite", v);
     w = utt_wave(u);
     /*** cst_wave_save_riff(w, "output.wav");   */
