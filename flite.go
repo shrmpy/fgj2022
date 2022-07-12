@@ -11,7 +11,7 @@ import (
 )
 import (
 	"github.com/tetratelabs/wazero"
-	"github.com/tetratelabs/wazero/experimental"
+	//"github.com/tetratelabs/wazero/experimental"
 	"github.com/tetratelabs/wazero/wasi_snapshot_preview1"
 )
 
@@ -34,8 +34,6 @@ func fliteTest(speak string) {
 	if _, err := wasi_snapshot_preview1.Instantiate(ctx, rt); err != nil {
 		log.Panicf("FAIL wazero, %s", err.Error())
 	}
-	ctx, closer := experimental.WithFS(ctx, tmpFS)
-	defer closer.Close(ctx)
 
 	code, err := rt.CompileModule(ctx, flite_wasm, wazero.NewCompileConfig())
 	if err != nil {

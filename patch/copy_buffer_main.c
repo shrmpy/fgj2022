@@ -42,7 +42,6 @@
 #include <string.h>
 #include "flite.h"
 
-
 int main(int argc, char **argv)
 {
     cst_voice *v;
@@ -54,10 +53,11 @@ int main(int argc, char **argv)
     v = flite_voice_select("kal");
     u = flite_synth_text("whole new world of flite", v);
     w = utt_wave(u);
-    cst_wave_save_riff(w, "output.wav");
-    /* calls cst_wave_save_riff_fd(w,fd) which uses cst_fwrite
-     * so we need to create a cst_wave_save_riff_buffer(w) */
+    /*** cst_wave_save_riff(w, "output.wav");   */
+    fgj_wave_copy_riff(w);
     delete_utterance(u);
 
     return 0;
 }
+
+
