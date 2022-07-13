@@ -20,14 +20,11 @@ import (
 	"image"
 	"image/color"
 	_ "image/png"
-	"io"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/hajimehoshi/ebiten/v2/audio/wav"
-	//"github.com/hajimehoshi/ebiten/v2/audio/vorbis"
-	//raudio "github.com/hajimehoshi/ebiten/v2/examples/resources/audio"
 	riaudio "github.com/hajimehoshi/ebiten/v2/examples/resources/images/audio"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/tinne26/etxt"
@@ -48,42 +45,21 @@ type testPlay struct {
 
 func NewPlay(g *Game, wd, ht int, re *etxt.Renderer) (*testPlay, error) {
 	var w = &testPlay{ game: g }
-
 	var err error
 	// Initialize audio context.
 	w.audioContext = audio.NewContext(sampleRate)
-
-	// In this example, embedded resource "Jab_wav" is used.
-	//
-	// If you want to use a wav file, open this and pass the file stream to wav.Decode.
-	// Note that file's Close() should not be closed here
-	// since audio.Player manages stream state.
-	//
-	//     f, err := os.Open("jab.wav")
-	//     if err != nil {
-	//         return err
-	//     }
-	//
-	//     d, err := wav.DecodeWithoutResampling(f)
-	//     ...
-
 	// Decode wav-formatted data and retrieve decoded PCM stream.
 	d, err := wav.DecodeWithSampleRate(sampleRate,bytes.NewReader(flite_WAV))
-	//d, err := vorbis.DecodeWithSampleRate(sampleRate,bytes.NewReader(raudio.Ragtime_ogg))
 	if err != nil {
 		return nil, err
 	}
-
-	// Create an audio.Player that has one stream.
-	w.audioPlayer, err = w.audioContext.NewPlayer(d)
-	if err != nil {
+	if err = w.replaceTrack(d); err != nil {
 		return nil, err
 	}
 
 	w.arrow = newArrow(wd,ht,re,color.RGBA{0xff,0x72,0x5c,0xff})
 	w.arrow.HandleFunc(func(el mue) { w.toggleAudio() })
 
-	w.audioPlayer.SetVolume(1)
 	const btnPadding = 16
 
 	img, _, err := image.Decode(bytes.NewReader(riaudio.Alert_png))
@@ -117,23 +93,15 @@ func (w *testPlay) Update() error {
 		w.arrow.Action()
 	}
 	if w.fliteAudio() {
-		//ctx := context.WithTimeout(context.Background())
-		reader, writer := io.Pipe()
-		log.Printf("INFO flite enter")
-		go func(){
-			fliteTest(writer, "Flite hello world placeholder.")
-			log.Printf("INFO flite exit")
-		}()
-
-	        ////if _, err := wav.DecodeWithSampleRate(sampleRate,data); err != nil {
-	        srd, err := wav.DecodeWithSampleRate(sampleRate,reader)
+		var buf = fliteTest("Flite hello world placeholder.")
+	        str, err := wav.DecodeWithSampleRate(sampleRate,bytes.NewReader(buf))
 		if err != nil {
 			log.Printf("DEBUG buffer, %s", err.Error())
 		}
-		log.Printf("INFO decode, %d", srd.Length())
-		// TODO signal goroutine (context-with-timeout for safety?)
-		//ctx.Cancel()
-		writer.Close()
+		log.Printf("INFO decode, %d", str.Length())
+		if err := w.replaceTrack(str); err != nil {
+			log.Printf("DEBUG track, %s", err.Error())
+		}
 	}
 
 	return nil
@@ -197,6 +165,17 @@ func (w *testPlay) toggleAudio() {
 	}
 	w.audioPlayer.Rewind()
 	w.audioPlayer.Play()
+}
+func (w *testPlay) replaceTrack(str *wav.Stream) error {
+	w.Close()
+	var err error
+	// Create an audio.Player that has one stream.
+	w.audioPlayer, err = w.audioContext.NewPlayer(str)
+	if err != nil {
+		return err
+	}
+	w.audioPlayer.SetVolume(1)
+	return nil
 }
 func (w *testPlay) Close() {
 	if w.audioPlayer != nil {
