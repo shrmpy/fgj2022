@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 package main
 
 import (
@@ -31,54 +30,55 @@ import (
 )
 
 const (
-	sampleRate   = 16000
+	sampleRate = 16000
 )
+
 var alertButtonImage *ebiten.Image
 
 type testPlay struct {
-	audioContext *audio.Context
-	audioPlayer  *audio.Player
-	arrow *clickable
-	game *Game
+	audioContext        *audio.Context
+	audioPlayer         *audio.Player
+	arrow               *clickable
+	game                *Game
 	alertButtonPosition image.Point
 }
 
 func NewPlay(g *Game, wd, ht int, re *etxt.Renderer) (*testPlay, error) {
-	var w = &testPlay{ game: g }
+	var w = &testPlay{game: g}
 	var err error
 	// Initialize audio context.
 	w.audioContext = audio.NewContext(sampleRate)
 	// Decode wav-formatted data and retrieve decoded PCM stream.
-	d, err := wav.DecodeWithSampleRate(sampleRate,bytes.NewReader(flite_WAV))
+	d, err := wav.DecodeWithSampleRate(sampleRate, bytes.NewReader(flite_WAV))
 	if err != nil {
 		return nil, err
 	}
-	if err = w.replaceTrack(d); err != nil {
+	if err = w.replaceSource(d); err != nil {
 		return nil, err
 	}
 
-	w.arrow = newArrow(wd,ht,re,color.RGBA{0xff,0x72,0x5c,0xff})
+	w.arrow = newArrow(wd, ht, re, color.RGBA{0xff, 0x72, 0x5c, 0xff})
 	w.arrow.HandleFunc(func(el mue) { w.toggleAudio() })
 
 	const btnPadding = 16
 
 	img, _, err := image.Decode(bytes.NewReader(riaudio.Alert_png))
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	alertButtonImage = ebiten.NewImageFromImage(img)
 	var sz, _ = alertButtonImage.Size()
 
-	w.alertButtonPosition.X = (ht -sz*2 + btnPadding*1) / 2 + sz + btnPadding
+	w.alertButtonPosition.X = (ht-sz*2+btnPadding*1)/2 + sz + btnPadding
 	w.alertButtonPosition.Y = ht - 160
 
 	return w, nil
 }
 
 func newArrow(wd, ht int, re *etxt.Renderer, fg color.RGBA) *clickable {
-        var label = "▶PLAY"
-        var sz = re.SelectionRect(label)
-        return newClickable(0, ht, etxt.Bottom, etxt.Left, label, sz, fg)
+	var label = "▶PLAY"
+	var sz = re.SelectionRect(label)
+	return newClickable(0, ht, etxt.Bottom, etxt.Left, label, sz, fg)
 }
 
 func (w *testPlay) Update() error {
@@ -94,13 +94,13 @@ func (w *testPlay) Update() error {
 	}
 	if w.fliteAudio() {
 		var buf = fliteTest("Flite hello world placeholder.")
-	        str, err := wav.DecodeWithSampleRate(sampleRate,bytes.NewReader(buf))
+		str, err := wav.DecodeWithSampleRate(sampleRate, bytes.NewReader(buf))
 		if err != nil {
 			log.Printf("DEBUG buffer, %s", err.Error())
 		}
 		log.Printf("INFO decode, %d", str.Length())
-		if err := w.replaceTrack(str); err != nil {
-			log.Printf("DEBUG track, %s", err.Error())
+		if err := w.replaceSource(str); err != nil {
+			log.Printf("DEBUG source, %s", err.Error())
 		}
 	}
 
@@ -111,17 +111,18 @@ func (w *testPlay) Draw(re *etxt.Renderer, screen *ebiten.Image) {
 
 	if w.audioPlayer.IsPlaying() {
 		log.Printf("INFO playing")
-		w.arrow.Text ="■STOP"
+		w.arrow.Text = "■STOP"
 	} else {
-		w.arrow.Text ="▶PLAY"
+		w.arrow.Text = "▶PLAY"
 	}
 
 	w.arrow.Draw(re)
 
-        var op = &ebiten.DrawImageOptions{}
-        op.GeoM.Translate(float64(w.alertButtonPosition.X), float64(w.alertButtonPosition.Y))
-        screen.DrawImage(alertButtonImage, op)
+	var op = &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(float64(w.alertButtonPosition.X), float64(w.alertButtonPosition.Y))
+	screen.DrawImage(alertButtonImage, op)
 }
+
 // any touch event?
 func (w *testPlay) controlAudio() bool {
 	var r = w.arrow.HitBox()
@@ -157,6 +158,7 @@ func (w *testPlay) fliteAudio() bool {
 	}
 	return false
 }
+
 // attached to the play-arrow
 func (w *testPlay) toggleAudio() {
 	if w.audioPlayer.IsPlaying() {
@@ -166,7 +168,7 @@ func (w *testPlay) toggleAudio() {
 	w.audioPlayer.Rewind()
 	w.audioPlayer.Play()
 }
-func (w *testPlay) replaceTrack(str *wav.Stream) error {
+func (w *testPlay) replaceSource(str *wav.Stream) error {
 	w.Close()
 	var err error
 	// Create an audio.Player that has one stream.
@@ -182,4 +184,3 @@ func (w *testPlay) Close() {
 		w.audioPlayer.Close()
 	}
 }
-

@@ -10,8 +10,8 @@ import (
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
-	"github.com/tinne26/etxt"
 	"github.com/shrmpy/fgj2022/acorn"
+	"github.com/tinne26/etxt"
 )
 
 //go:generate cp $GOROOT/misc/wasm/wasm_exec.js dist/web/wasm_exec.js
@@ -34,7 +34,7 @@ func main() {
 		history: make([]string, 0, 25),
 	}
 	game.p = acorn.NewParcel(game.AddHistory)
-	if game.play, err = NewPlay(game, wd,ht,game.txtre); err != nil {
+	if game.play, err = NewPlay(game, wd, ht, game.txtre); err != nil {
 		log.Fatalf("FAIL wav, %s", err.Error())
 	}
 	defer game.play.Close()
@@ -60,7 +60,7 @@ func (g *Game) Update() error {
 		ebiten.SetFullscreen(!fs)
 	}
 
-	// TODO 
+	// TODO
 	if ebiten.IsKeyPressed(ebiten.KeySpace) {
 		g.p.Experiment()
 	}
@@ -78,9 +78,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 func newRenderer() *etxt.Renderer {
 	var (
-		err error
-		name string
-		fonts  = etxt.NewFontLibrary()
+		err   error
+		name  string
+		fonts = etxt.NewFontLibrary()
 	)
 	if name, err = fonts.ParseFontBytes(dejavuSansMonoTTF); err != nil {
 		log.Fatalf("FAIL Parse DejaVu Sans Mono, %s", err.Error())
@@ -114,10 +114,10 @@ type Game struct {
 	Width  int
 	Height int
 
-	txtre   *etxt.Renderer
-	history []string
-	p   *acorn.Parcel
-	play *testPlay
+	txtre               *etxt.Renderer
+	history             []string
+	p                   *acorn.Parcel
+	play                *testPlay
 	justPressedTouchIDs []ebiten.TouchID
 }
 
