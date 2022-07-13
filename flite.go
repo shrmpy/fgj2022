@@ -3,11 +3,10 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	_ "embed"
+	"io"
 	"log"
-	//"io/fs"
 	"os"
 )
 import (
@@ -22,13 +21,12 @@ var flite_WAV []byte
 //go:embed dist/flite.wasm
 var flite_wasm []byte
 
-func fliteTest(speech string) *bytes.Buffer {
+func fliteTest(writer io.Writer, speech string) error {
 	var ctx = context.Background()
 	var rt = wazero.NewRuntimeWithConfig(wazero.NewRuntimeConfig().WithWasmCore2())
 	defer rt.Close(ctx)
-	var data bytes.Buffer
 	var cfg = wazero.NewModuleConfig().
-		WithStdout(&data).
+		WithStdout(writer).
 		WithStderr(os.Stderr)
 
 
@@ -50,7 +48,7 @@ func fliteTest(speech string) *bytes.Buffer {
 	// InstantiateModule runs the "_start" function, WASI's "main".
 	// * Set the program name (arg[0]) to "wasi"; arg[1] should be "/test.txt".
 
-	return &data
+	return nil
 }
 
 

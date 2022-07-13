@@ -20,6 +20,7 @@ import (
 	"image"
 	"image/color"
 	_ "image/png"
+	"io"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -113,21 +114,26 @@ func (w *testPlay) Update() error {
 
 	// search touch events
 	if w.controlAudio() {
-		/*
-		if file, err := tmpFS.Open("output.wav"); err == nil {
-			if si, ferr := file.Stat(); ferr == nil {
-				log.Printf("DEBUG %s, %d / %v", si.Name(), si.Size(), si.Sys())
-			}
-		}*/
 		w.arrow.Action()
 	}
 	if w.fliteAudio() {
+		//ctx := context.WithTimeout(context.Background())
+		reader, writer := io.Pipe()
 		log.Printf("INFO flite enter")
-		data := fliteTest("Flite hello world placeholder.")
-		log.Printf("INFO flite exit")
-	        if _, err := wav.DecodeWithSampleRate(sampleRate,data); err != nil {
+		go func(){
+			fliteTest(writer, "Flite hello world placeholder.")
+			log.Printf("INFO flite exit")
+		}()
+
+	        ////if _, err := wav.DecodeWithSampleRate(sampleRate,data); err != nil {
+	        srd, err := wav.DecodeWithSampleRate(sampleRate,reader)
+		if err != nil {
 			log.Printf("DEBUG buffer, %s", err.Error())
 		}
+		log.Printf("INFO decode, %d", srd.Length())
+		// TODO signal goroutine (context-with-timeout for safety?)
+		//ctx.Cancel()
+		writer.Close()
 	}
 
 	return nil
