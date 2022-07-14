@@ -1,4 +1,4 @@
-//go:build !(s390x && mips && wasm)
+//go:build !(s390x || mips || js)
 
 package acorn
 

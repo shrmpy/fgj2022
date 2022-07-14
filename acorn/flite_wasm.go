@@ -3,6 +3,7 @@ package acorn
 
 import (
 	"bytes"
+	"log"
 )
 
 // TODO for web target, we need to fallback on pre-gen WAV audio?
