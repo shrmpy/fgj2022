@@ -38,6 +38,7 @@ func main() {
 		log.Fatalf("FAIL wav, %s", err.Error())
 	}
 	defer game.play.Close()
+	game.bar = newBar(wd, ht, game.txtre, color.RGBA{0x66, 0x33, 0x99, 0xff})
 
 	ebiten.SetWindowSize(wd, ht)
 	ebiten.SetWindowTitle("fgj2022")
@@ -66,6 +67,7 @@ func (g *Game) Update() error {
 	}
 
 	g.play.Update()
+	g.bar.Update(g.justPressedTouchIDs)
 
 	return nil
 }
@@ -74,6 +76,7 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.printHistory(screen)
 	g.play.Draw(g.txtre, screen)
+	g.bar.Draw(g.txtre)
 }
 
 func newRenderer() *etxt.Renderer {
@@ -119,6 +122,7 @@ type Game struct {
 	p                   *acorn.Parcel
 	play                *testPlay
 	justPressedTouchIDs []ebiten.TouchID
+	bar *cmdbar
 }
 
 // Layout is static for now, can be dynamic

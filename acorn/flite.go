@@ -1,6 +1,6 @@
-//go:build !(s390x && mips)
+//go:build !(s390x && mips && wasm)
 
-package main
+package acorn
 
 import (
 	"bytes"
@@ -14,13 +14,8 @@ import (
 	"github.com/tetratelabs/wazero/wasi_snapshot_preview1"
 )
 
-//go:embed dist/testout.wav
-var flite_WAV []byte
 
-//go:embed dist/flite.wasm
-var flite_wasm []byte
-
-func fliteTest(speech string) []byte {
+func FliteSpeech(wasm []byte, speech string) []byte {
 	log.Printf("INFO flite enter")
 
 	var ctx = context.Background()
@@ -29,7 +24,7 @@ func fliteTest(speech string) []byte {
 	if _, err := wasi_snapshot_preview1.Instantiate(ctx, rt); err != nil {
 		log.Panicf("FAIL wazero, %s", err.Error())
 	}
-	code, err := rt.CompileModule(ctx, flite_wasm, wazero.NewCompileConfig())
+	code, err := rt.CompileModule(ctx, wasm, wazero.NewCompileConfig())
 	if err != nil {
 		log.Panicf("FAIL compile, %s", err.Error())
 	}

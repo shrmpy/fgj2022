@@ -15,6 +15,7 @@
 package main
 
 import (
+	_ "embed"
 	"bytes"
 	"image"
 	"image/color"
@@ -27,7 +28,14 @@ import (
 	riaudio "github.com/hajimehoshi/ebiten/v2/examples/resources/images/audio"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/tinne26/etxt"
+	"github.com/shrmpy/fgj2022/acorn"
 )
+
+//go:embed dist/testout.wav
+var flite_WAV []byte
+
+//go:embed dist/flite.wasm
+var flite_wasm []byte
 
 const (
 	sampleRate = 16000
@@ -78,7 +86,8 @@ func NewPlay(g *Game, wd, ht int, re *etxt.Renderer) (*testPlay, error) {
 func newArrow(wd, ht int, re *etxt.Renderer, fg color.RGBA) *clickable {
 	var label = "▶PLAY"
 	var sz = re.SelectionRect(label)
-	return newClickable(0, ht, etxt.Bottom, etxt.Left, label, sz, fg)
+	var aboveBottom = ht - sz.HeightCeil()
+	return newClickable(0, aboveBottom, etxt.Bottom, etxt.Left, label, sz, fg)
 }
 
 func (w *testPlay) Update() error {
@@ -93,7 +102,7 @@ func (w *testPlay) Update() error {
 		w.arrow.Action()
 	}
 	if w.fliteAudio() {
-		var buf = fliteTest("Flite hello world placeholder.")
+		var buf = acorn.FliteSpeech(flite_wasm, "Flite hello world placeholder.")
 		str, err := wav.DecodeWithSampleRate(sampleRate, bytes.NewReader(buf))
 		if err != nil {
 			log.Printf("DEBUG buffer, %s", err.Error())

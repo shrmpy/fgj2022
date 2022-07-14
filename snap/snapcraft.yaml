@@ -28,7 +28,7 @@ layout:
 apps:
   fgj2022:
     command: $SNAP/bin/fgj2022
-    command-chain: bin/desktop-launch
+    command-chain: ["bin/desktop-launch"]
     plugs: [network,x11,unity7,opengl,alsa,audio-playback,pulseaudio]
 
 parts:
