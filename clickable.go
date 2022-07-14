@@ -60,6 +60,7 @@ func (c *clickable) Update() {
 
 // bounds with respect to h/v alignment
 func (c *clickable) HitBox() image.Rectangle {
+	//todo is it equivalent to rectSize.ImageRect()?
 	var minx, miny, maxx, maxy int
 	if c.ha == etxt.Left {
 		minx = c.x

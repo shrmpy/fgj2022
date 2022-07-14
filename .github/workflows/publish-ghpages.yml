@@ -35,7 +35,7 @@ jobs:
         name: wasi-flite
         retention-days: 1
         path: |
-          flite/bin
+          flite/bin/copy_buffer
 
   archive_job:
     needs: wasi_job
