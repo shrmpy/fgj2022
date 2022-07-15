@@ -16,7 +16,6 @@ google-services.json
 *.aar
 *.jar
 mobile/android/app/release/
-*.wasm
 
 # IntelliJ related
 *.iml

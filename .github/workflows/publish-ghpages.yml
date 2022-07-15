@@ -10,15 +10,13 @@ permissions:
 jobs:
   wasi_job:
     runs-on: ubuntu-latest
-    name: WASI attempt 
+    name: WASI module
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/setup-go@v3
-      with:
-        go-version: '>=1.18.0'
 
     - name: WASI flite step
       run: |
+        sudo apt-get -y install clang libasound2-dev
         wget -q https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-16/wasi-sdk_16.0_amd64.deb
         sudo dpkg -i wasi-sdk_16.0_amd64.deb
         git clone --depth=1 https://github.com/shrmpy/flite.git
@@ -26,7 +24,7 @@ jobs:
         cp patch/copy_buffer_main.c flite/main/
         cp patch/main.Makefile flite/main/Makefile
         cd flite
-        ./configure --host=wasm32-wasi CC=/opt/wasi-sdk/bin/clang AR=/opt/wasi-sdk/bin/llvm-ar RANLIB=/opt/wasi-sdk/bin/llvm-ranlib
+        ./configure --host=wasm32-wasi CC=clang AR=/opt/wasi-sdk/bin/llvm-ar RANLIB=/opt/wasi-sdk/bin/llvm-ranlib
         make
 
     - name: WASI artifacts
