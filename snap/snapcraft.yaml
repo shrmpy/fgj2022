@@ -27,38 +27,12 @@ layout:
 
 apps:
   fgj2022:
-    command: $SNAP/bin/fgj2022
+    command: bin/fgj2022
     command-chain: ["bin/desktop-launch"]
     plugs: [network,x11,unity7,opengl,alsa,audio-playback,pulseaudio]
 
 parts:
-  locsrc:
-    source: .
-    plugin: dump
-  wasi-sdk:
-    after: [chk-part]
-    source: https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-16/wasi-sdk_16.0_amd64.deb
-    source-type: deb
-    plugin: dump
-  wasm-flite:
-    after: [wasi-sdk]
-    source: https://github.com/shrmpy/flite.git
-    source-depth: 1
-    plugin: autotools
-    build-environment:
-    - CC: "clang"
-    autotools-configure-parameters: [ --host=wasm32-wasi ]
-    override-pull: |
-        snapcraftctl pull
-        cp $SNAPCRAFT_PART_SRC/../locsrc/patch/cst_wave_io.c flite/src/speech/
-        cp $SNAPCRAFT_PART_SRC/../locsrc/patch/copy_buffer_main.c flite/main/
-        cp $SNAPCRAFT_PART_SRC/../locsrc/patch/main.Makefile flite/main/Makefile
-    build-packages: 
-    - libasound2-dev
-    - clang
-
   g-build:
-    after: [wasm-flite]
     plugin: go
     source: .
     override-pull: |
@@ -66,7 +40,6 @@ parts:
         version="$(git describe --tags --long)"
         snapcraftctl set-version "$version"
         snapcraftctl set-grade stable
-        cp $SNAPCRAFT_PART_BUILD/../wasm-flite/bin/copy_buffer dist/flite.wasm
     build-packages: 
     - git
     - libc6-dev
