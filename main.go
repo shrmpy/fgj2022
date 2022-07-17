@@ -26,12 +26,15 @@ func main() {
 	var (
 		err    error
 		wd, ht = 640, 480
+		ch     = make(chan signal, 100)
 	)
+	defer close(ch)
 	var game = &Game{
 		Width:   wd,
 		Height:  ht,
 		txtre:   newRenderer(),
 		history: make([]string, 0, 25),
+		bus:     ch,
 	}
 	game.p = acorn.NewParcel(game.AddHistory)
 	if game.play, err = NewPlay(game, wd, ht, game.txtre); err != nil {
@@ -39,6 +42,10 @@ func main() {
 	}
 	defer game.play.Close()
 	game.bar = newBar(wd, ht, game.txtre, color.RGBA{0x66, 0x33, 0x99, 0xff})
+	game.bar.QuitFunc(game.quitSignal)
+	game.bar.TTSFunc(game.speechText)
+	game.burger = newBurger(wd, ht, game.txtre, color.RGBA{0x66, 0x33, 0x99, 0xff})
+	game.burger.HandleFunc(game.quitSignal)
 
 	ebiten.SetWindowSize(wd, ht)
 	ebiten.SetWindowTitle("fgj2022")
@@ -49,25 +56,31 @@ func main() {
 
 // Update runs game logic steps
 func (g *Game) Update() error {
-	g.justPressedTouchIDs = inpututil.AppendJustPressedTouchIDs(g.justPressedTouchIDs[:0])
-	// Pressing Q any time quits immediately
-	if ebiten.IsKeyPressed(ebiten.KeyQ) {
-		return fmt.Errorf("INFO Quit key")
-	}
+	/*
+		// Pressing F toggles full-screen
+		if inpututil.IsKeyJustPressed(ebiten.KeyF) {
+			var fs = ebiten.IsFullscreen()
+			ebiten.SetFullscreen(!fs)
+		}*/
 
-	// Pressing F toggles full-screen
-	if inpututil.IsKeyJustPressed(ebiten.KeyF) {
-		var fs = ebiten.IsFullscreen()
-		ebiten.SetFullscreen(!fs)
-	}
+	select {
+	case req := <-g.bus:
+		if req.op == 8888 {
+			return fmt.Errorf("INFO Teardown")
+		}
 
-	// TODO
-	if ebiten.IsKeyPressed(ebiten.KeySpace) {
-		g.p.Experiment()
-	}
+	default:
+		/*// TODO
+		if ebiten.IsKeyPressed(ebiten.KeySpace) {
+			g.p.Experiment()
+		}*/
+		g.justPressedTouchIDs = inpututil.AppendJustPressedTouchIDs(g.justPressedTouchIDs[:0])
 
-	g.play.Update()
-	g.bar.Update(g.justPressedTouchIDs)
+		g.burger.Update(g.justPressedTouchIDs)
+		g.play.Update(g.justPressedTouchIDs)
+		g.bar.Update(g.justPressedTouchIDs)
+
+	}
 
 	return nil
 }
@@ -77,6 +90,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	g.printHistory(screen)
 	g.play.Draw(g.txtre, screen)
 	g.bar.Draw(g.txtre)
+	g.burger.Draw(g.txtre)
 }
 
 func newRenderer() *etxt.Renderer {
@@ -107,9 +121,11 @@ func (g *Game) printHistory(screen *ebiten.Image) {
 		sz := g.txtre.SelectionRect(msg)
 		g.txtre.Draw(msg, 0, g.Height-sz.Height.Ceil()*i)
 	}
-	// print frame rate in se corner
-	g.txtre.SetAlign(etxt.Bottom, etxt.Right)
-	g.txtre.Draw(fmt.Sprintf("TPS: %0.2f", ebiten.CurrentTPS()), g.Width-1, g.Height)
+	/*
+		// print frame rate in se corner
+		g.txtre.SetAlign(etxt.Bottom, etxt.Right)
+		g.txtre.Draw(fmt.Sprintf("TPS: %0.2f", ebiten.CurrentTPS()), g.Width-1, g.Height)
+	*/
 }
 
 // Game represents the main game state
@@ -122,7 +138,9 @@ type Game struct {
 	p                   *acorn.Parcel
 	play                *testPlay
 	justPressedTouchIDs []ebiten.TouchID
-	bar *cmdbar
+	bar                 *cmdbar
+	bus                 chan signal
+	burger              *clickable
 }
 
 // Layout is static for now, can be dynamic
@@ -136,4 +154,17 @@ func (g *Game) AddHistory(tmp string, values ...any) {
 	if len(g.history) < 25 {
 		g.history = append(g.history, msg)
 	}
+}
+
+func (g *Game) quitSignal(el mue) {
+	log.Printf("INFO SIG quit")
+	g.bus <- signal{op: 8888}
+}
+func (g *Game) speechText(sp string) {
+	g.play.Speech(sp)
+}
+
+type signal struct {
+	op   int
+	data string
 }
