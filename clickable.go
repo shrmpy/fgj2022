@@ -6,6 +6,7 @@ import (
 )
 import (
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/tinne26/etxt"
 )
 
@@ -39,8 +40,7 @@ func newClickable(x, y int, va etxt.VertAlign, ha etxt.HorzAlign,
 	}
 }
 
-func (c *clickable) Update() {
-	// TODO fold in touch events too
+func (c *clickable) Update(touches []ebiten.TouchID) {
 	var click = ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
 	if !click {
 		if c.mouseDown {
@@ -50,8 +50,8 @@ func (c *clickable) Update() {
 		c.mouseDown = false
 		return
 	}
-	var hb = c.HitBox()
-	if image.Pt(ebiten.CursorPosition()).In(hb) {
+
+	if c.hasTouch(touches) {
 		c.mouseDown = true
 	} else {
 		c.mouseDown = false
@@ -60,7 +60,8 @@ func (c *clickable) Update() {
 
 // bounds with respect to h/v alignment
 func (c *clickable) HitBox() image.Rectangle {
-	//todo is it equivalent to rectSize.ImageRect()?
+	//return c.rectSize.ImageRect()
+
 	var minx, miny, maxx, maxy int
 	if c.ha == etxt.Left {
 		minx = c.x
@@ -77,6 +78,7 @@ func (c *clickable) HitBox() image.Rectangle {
 		miny = c.y - c.rectSize.HeightCeil()
 	}
 	return image.Rect(minx, miny, maxx, maxy)
+
 }
 func (c *clickable) Draw(re *etxt.Renderer) {
 	re.SetAlign(c.va, c.ha)
@@ -91,6 +93,22 @@ func (c *clickable) Action() error {
 }
 func (c *clickable) HandleFunc(f func(el mue)) {
 	c.onPressed = f
+}
+
+func (c *clickable) hasTouch(touches []ebiten.TouchID) bool {
+	var r = c.HitBox()
+	if image.Pt(ebiten.CursorPosition()).In(r) {
+		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+			return true
+		}
+	}
+
+	for _, id := range touches {
+		if image.Pt(ebiten.TouchPosition(id)).In(r) {
+			return true
+		}
+	}
+	return false
 }
 
 // "minimum UI element" is text that responds to events

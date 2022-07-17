@@ -15,8 +15,8 @@
 package main
 
 import (
-	_ "embed"
 	"bytes"
+	_ "embed"
 	"image"
 	"image/color"
 	_ "image/png"
@@ -25,10 +25,10 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/hajimehoshi/ebiten/v2/audio/wav"
-	riaudio "github.com/hajimehoshi/ebiten/v2/examples/resources/images/audio"
+	//riaudio "github.com/hajimehoshi/ebiten/v2/examples/resources/images/audio"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
-	"github.com/tinne26/etxt"
 	"github.com/shrmpy/fgj2022/acorn"
+	"github.com/tinne26/etxt"
 )
 
 //go:embed dist/testout.wav
@@ -44,11 +44,12 @@ const (
 var alertButtonImage *ebiten.Image
 
 type testPlay struct {
-	audioContext        *audio.Context
-	audioPlayer         *audio.Player
-	arrow               *clickable
-	game                *Game
-	alertButtonPosition image.Point
+	audioContext *audio.Context
+	audioPlayer  *audio.Player
+	arrow        *clickable
+	game         *Game
+	//alertButtonPosition image.Point
+	speech string
 }
 
 func NewPlay(g *Game, wd, ht int, re *etxt.Renderer) (*testPlay, error) {
@@ -69,16 +70,17 @@ func NewPlay(g *Game, wd, ht int, re *etxt.Renderer) (*testPlay, error) {
 	w.arrow.HandleFunc(func(el mue) { w.toggleAudio() })
 
 	const btnPadding = 16
+	/*
+		img, _, err := image.Decode(bytes.NewReader(riaudio.Alert_png))
+		if err != nil {
+			return nil, err
+		}
+		alertButtonImage = ebiten.NewImageFromImage(img)
+		var sz, _ = alertButtonImage.Size()
 
-	img, _, err := image.Decode(bytes.NewReader(riaudio.Alert_png))
-	if err != nil {
-		return nil, err
-	}
-	alertButtonImage = ebiten.NewImageFromImage(img)
-	var sz, _ = alertButtonImage.Size()
-
-	w.alertButtonPosition.X = (ht-sz*2+btnPadding*1)/2 + sz + btnPadding
-	w.alertButtonPosition.Y = ht - 160
+		w.alertButtonPosition.X = (ht-sz*2+btnPadding*1)/2 + sz + btnPadding
+		w.alertButtonPosition.Y = ht - 160
+	*/
 
 	return w, nil
 }
@@ -87,31 +89,25 @@ func newArrow(wd, ht int, re *etxt.Renderer, fg color.RGBA) *clickable {
 	var label = "▶PLAY"
 	var sz = re.SelectionRect(label)
 	var aboveBottom = ht - sz.HeightCeil()
-	return newClickable(0, aboveBottom, etxt.Bottom, etxt.Left, label, sz, fg)
+	return newClickable(wd, aboveBottom, etxt.Bottom, etxt.Right, label, sz, fg)
 }
 
-func (w *testPlay) Update() error {
-	/* //TODO press P key needs keyboard in mobile
-	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
-		w.arrow.Action()
+func (w *testPlay) Update(touches []ebiten.TouchID) error {
+	if !w.controlAudio(touches) || w.speech == "" {
 		return nil
-	}*/
+	}
 
-	// search touch events
-	if w.controlAudio() {
-		w.arrow.Action()
+	var buf = acorn.FliteSpeech(flite_wasm, w.speech)
+	str, err := wav.DecodeWithSampleRate(sampleRate, bytes.NewReader(buf))
+	if err != nil {
+		log.Printf("DEBUG buffer, %s", err.Error())
 	}
-	if w.fliteAudio() {
-		var buf = acorn.FliteSpeech(flite_wasm, "Flite hello world placeholder.")
-		str, err := wav.DecodeWithSampleRate(sampleRate, bytes.NewReader(buf))
-		if err != nil {
-			log.Printf("DEBUG buffer, %s", err.Error())
-		}
-		log.Printf("INFO decode, %d", str.Length())
-		if err := w.replaceSource(str); err != nil {
-			log.Printf("DEBUG source, %s", err.Error())
-		}
+	log.Printf("INFO decode, %d", str.Length())
+	if err := w.replaceSource(str); err != nil {
+		log.Printf("DEBUG source, %s", err.Error())
 	}
+
+	w.arrow.Action()
 
 	return nil
 }
@@ -126,22 +122,21 @@ func (w *testPlay) Draw(re *etxt.Renderer, screen *ebiten.Image) {
 	}
 
 	w.arrow.Draw(re)
-
-	var op = &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(float64(w.alertButtonPosition.X), float64(w.alertButtonPosition.Y))
-	screen.DrawImage(alertButtonImage, op)
+	/*
+		var op = &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(float64(w.alertButtonPosition.X), float64(w.alertButtonPosition.Y))
+		screen.DrawImage(alertButtonImage, op)*/
 }
 
 // any touch event?
-func (w *testPlay) controlAudio() bool {
+func (w *testPlay) controlAudio(touches []ebiten.TouchID) bool {
 	var r = w.arrow.HitBox()
 	if image.Pt(ebiten.CursorPosition()).In(r) {
 		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 			return true
 		}
 	}
-	//todo alt instead of ref to game
-	for _, id := range w.game.justPressedTouchIDs {
+	for _, id := range touches {
 		if image.Pt(ebiten.TouchPosition(id)).In(r) {
 			return true
 		}
@@ -149,22 +144,23 @@ func (w *testPlay) controlAudio() bool {
 	return false
 }
 func (w *testPlay) fliteAudio() bool {
-	var r = image.Rectangle{
-		Min: w.alertButtonPosition,
-		Max: w.alertButtonPosition.Add(image.Pt(alertButtonImage.Size())),
-	}
+	/*
+		var r = image.Rectangle{
+			Min: w.alertButtonPosition,
+			Max: w.alertButtonPosition.Add(image.Pt(alertButtonImage.Size())),
+		}
 
-	if image.Pt(ebiten.CursorPosition()).In(r) {
-		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-			return true
+		if image.Pt(ebiten.CursorPosition()).In(r) {
+			if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+				return true
+			}
 		}
-	}
-	//todo alt instead of ref to game
-	for _, id := range w.game.justPressedTouchIDs {
-		if image.Pt(ebiten.TouchPosition(id)).In(r) {
-			return true
-		}
-	}
+		//todo alt instead of ref to game
+		for _, id := range w.game.justPressedTouchIDs {
+			if image.Pt(ebiten.TouchPosition(id)).In(r) {
+				return true
+			}
+		}*/
 	return false
 }
 
@@ -192,4 +188,8 @@ func (w *testPlay) Close() {
 	if w.audioPlayer != nil {
 		w.audioPlayer.Close()
 	}
+}
+func (w *testPlay) Speech(sp string) {
+	// allow external caller to "input" the text for speech
+	w.speech = sp
 }
