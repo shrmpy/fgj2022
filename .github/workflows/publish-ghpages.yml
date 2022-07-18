@@ -16,14 +16,16 @@ jobs:
 
     - name: WASI flite step
       env:
-        CC: clang
+        CC: /opt/wasi-sdk/bin/clang
+        AR: /opt/wasi-sdk/bin/llvm-ar
+        RANLIB: /opt/wasi-sdk/bin/llvm-ranlib
       run: |
         sudo apt-get -y install clang 
         wget -q https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-16/wasi-sdk_16.0_amd64.deb
         sudo dpkg -i wasi-sdk_16.0_amd64.deb
         git clone -b wavstdout --depth=1 https://github.com/shrmpy/flite.git
         cd flite
-        ./configure --host=wasm32-wasi  
+        ./configure --host=wasm32-wasi -DCST_AUDIO_NONE
         make
 
     - name: WASI artifacts
