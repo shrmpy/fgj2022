@@ -32,7 +32,35 @@ apps:
     plugs: [network,x11,unity7,opengl,alsa,audio-playback,pulseaudio]
 
 parts:
+  wasi-sdk:
+    plugin: dump
+    source: https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-16/wasi-sdk_16.0_amd64.deb
+    source-type: deb
+    filesets: 
+      exclude-dir: [ -opt/wasi-sdk ]
+    prime: 
+      - $exclude-dir
+  flite-patch:
+    after: [wasi-sdk]
+    source: https://github.com/shrmpy/flite.git
+    source-depth: 1
+    source-branch: wavstdout
+    plugin: autotools
+    autotools-configure-parameters: [ --host=wasm32-wasi, --prefix=/opt/flite ]
+    build-environment:
+    - CC: "clang"
+    build-packages:
+    - libasound2-dev
+    - clang
+    stage-packages: 
+    - libasound2
+    filesets: 
+      exclude-dir: [ -opt/flite ]
+    prime: 
+      - $exclude-dir
+
   g-build:
+    after: [flite-patch]
     plugin: go
     source: .
     override-pull: |
@@ -40,6 +68,7 @@ parts:
         version="$(git describe --tags --long)"
         snapcraftctl set-version "$version"
         snapcraftctl set-grade stable
+        cp ../../flite-patch/build/bin/wav_stdout ./dist/flite.wasm
     build-packages: 
     - git
     - libc6-dev
@@ -60,7 +89,6 @@ parts:
     - libxrandr2
     - libxxf86vm1
     - libasound2
-
 
   desktop-glib-only:
     after: [g-build]
