@@ -19,10 +19,7 @@ jobs:
         sudo apt-get -y install clang libasound2-dev
         wget -q https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-16/wasi-sdk_16.0_amd64.deb
         sudo dpkg -i wasi-sdk_16.0_amd64.deb
-        git clone --depth=1 https://github.com/shrmpy/flite.git
-        cp patch/cst_wave_io.c flite/src/speech/
-        cp patch/copy_buffer_main.c flite/main/
-        cp patch/main.Makefile flite/main/Makefile
+        git clone -b wavstdout --depth=1 https://github.com/shrmpy/flite.git
         cd flite
         ./configure --host=wasm32-wasi CC=clang AR=/opt/wasi-sdk/bin/llvm-ar RANLIB=/opt/wasi-sdk/bin/llvm-ranlib
         make
@@ -33,7 +30,7 @@ jobs:
         name: wasi-flite
         retention-days: 1
         path: |
-          flite/bin/copy_buffer
+          flite/bin/wav_stdout
 
   archive_job:
     needs: wasi_job
@@ -52,7 +49,7 @@ jobs:
 
     - name: WASM target step
       run: |
-        mv tmp/copy_buffer dist/flite.wasm
+        mv tmp/wav_stdout dist/flite.wasm
         GOOS=js GOARCH=wasm go generate
 
     - name: Archive artifacts
