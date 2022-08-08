@@ -45,7 +45,7 @@ cd fgj2022
 # make snap 
 snapcraft
 # local install
-sudo snap install fgj2022_0.0.6_arm64.snap --dangerous
+sudo snap install fgj2022_0.0.7_arm64.snap --dangerous
 # start program
 fgj2022
 ```
