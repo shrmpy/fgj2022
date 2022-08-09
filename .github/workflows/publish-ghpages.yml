@@ -33,7 +33,7 @@ jobs:
         name: wasi-flite
         retention-days: 1
         path: |
-          flite/bin
+          flite/bin/wav_stdout
           flite/build/wasm32-wasi/lib
 
   archive_job:
