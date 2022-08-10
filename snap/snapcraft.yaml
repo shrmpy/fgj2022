@@ -46,14 +46,11 @@ parts:
     source-depth: 1
     source-branch: wavstdout
     plugin: autotools
-    autotools-configure-parameters: [ --host=wasm32-wasi, --prefix=/opt/flite ]
+    autotools-configure-parameters: [ --host=wasm32-wasi, --prefix=/opt/flite, --with-audio=none ]
     build-environment:
     - CC: "clang"
     build-packages:
-    - libasound2-dev
     - clang
-    stage-packages: 
-    - libasound2
     filesets: 
       exclude-dir: [ -opt/flite ]
     prime: 
