@@ -34,7 +34,7 @@ jobs:
         retention-days: 1
         path: |
           flite/bin/wav_stdout
-          flite/build/wasm32-wasi/lib
+
 
   archive_job:
     needs: wasi_job
