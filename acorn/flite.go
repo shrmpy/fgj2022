@@ -11,20 +11,17 @@ import (
 )
 import (
 	"github.com/tetratelabs/wazero"
-	"github.com/tetratelabs/wazero/wasi_snapshot_preview1"
+	"github.com/tetratelabs/wazero/imports/wasi_snapshot_preview1"
 )
-
 
 func FliteSpeech(wasm []byte, speech string) []byte {
 	log.Printf("INFO flite enter")
 
 	var ctx = context.Background()
-	var rt = wazero.NewRuntimeWithConfig(wazero.NewRuntimeConfig().WithWasmCore2())
+	var rt = wazero.NewRuntime(ctx)
 	defer rt.Close(ctx)
-	if _, err := wasi_snapshot_preview1.Instantiate(ctx, rt); err != nil {
-		log.Panicf("FAIL wazero, %s", err.Error())
-	}
-	code, err := rt.CompileModule(ctx, wasm, wazero.NewCompileConfig())
+	wasi_snapshot_preview1.MustInstantiate(ctx, rt)
+	code, err := rt.CompileModule(ctx, wasm)
 	if err != nil {
 		log.Panicf("FAIL compile, %s", err.Error())
 	}
