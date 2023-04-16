@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/hajimehoshi/ebiten/v2 v2.3.6
-	github.com/tetratelabs/wazero v1.0.0-pre.4
+	github.com/tetratelabs/wazero v1.0.1
 	github.com/tinne26/etxt v0.0.3
 	golang.org/x/image v0.0.0-20220321031419-a8550c1d254a
 )
